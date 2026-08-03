@@ -1,15 +1,5 @@
-import { View, Text } from "react-native";
+import ProfileScreen from "../../screens/Profile/ProfileScreen";
 
-export default function HistoryScreen() {
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text>Profile</Text>
-    </View>
-  );
+export default function Profile() {
+  return <ProfileScreen />;
 }

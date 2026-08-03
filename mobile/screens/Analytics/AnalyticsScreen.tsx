@@ -7,6 +7,7 @@ import PeriodSelector from "../../components/analytics/PeriodSelector";
 import CategorySpendingCard from "../../components/analytics/CategorySpendingCard";
 import StatsCard from "../../components/analytics/StatsCard";
 import SpendingTrendCard from "../../components/analytics/SpendTrendCard";
+
 export default function AnalyticsScreen() {
     const [period, setPeriod] = useState<"W" | "M" | "Y">("M");
   return (
