@@ -5,6 +5,7 @@ export const typography={
     },
 
     size: {
+        caption: 10,
         xs:12,
         sm:14,
         md:16,
@@ -20,6 +21,14 @@ export const typography={
         medium: "500" as const,
         semibold: "600" as const,
         bold: "700" as const,
+        heavy: "800" as const,
+    },
+
+    letterspacing: {
+        tight: -0.5,
+        normal: 0,
+        wide: 1,
+        wider: 2,
     },
 
     lineHeight: {

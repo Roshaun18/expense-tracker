@@ -1,15 +1,5 @@
-import { View, Text } from "react-native";
+import AnalyticsScreen from "../../screens/Analytics/AnalyticsScreen";
 
-export default function HistoryScreen() {
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text>Analytics</Text>
-    </View>
-  );
+export default function Analytics() {
+  return <AnalyticsScreen />;
 }
