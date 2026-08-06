@@ -49,3 +49,27 @@ func (s *ExpenseService) CreateExpense(expense *models.Expense) error {
 func (s *ExpenseService) GetExpenses() ([]models.Expense, error) {
 	return s.repo.GetExpenses()
 }
+
+func (s *ExpenseService) GetExpenseByID(id string) (*models.Expense, error) {
+	return s.repo.GetExpenseByID(id)
+}
+
+func (s *ExpenseService) UpdateExpense(id string, expense *models.Expense) error {
+	return s.repo.UpdateExpense(id, expense)
+}
+
+func (s *ExpenseService) DeleteExpense(id string) error {
+	return s.repo.DeleteExpense(id)
+}
+
+func (s *ExpenseService) GetDashboardSummary() (*models.DashboardSummary, error) {
+	return s.repo.GetDashboardSummary()
+}
+
+func (s *ExpenseService) GetCategorySummary() ([]models.CategorySummary, error) {
+	return s.repo.GetCategorySummary()
+}
+
+func (s *ExpenseService) GetMonthlySummary() ([]models.MonthlySummary, error) {
+	return s.repo.GetMonthlySummary()
+}

@@ -24,6 +24,13 @@ func main() {
 
 	router.HandleFunc("/expenses", expenseHandler.CreateExpense).Methods("POST")
 	router.HandleFunc("/expenses", expenseHandler.GetExpenses).Methods("GET")
+	router.HandleFunc("/expenses/{id}", expenseHandler.GetExpenseByID).Methods("GET")
+	router.HandleFunc("/expenses/{id}", expenseHandler.UpdateExpense).Methods("PUT")
+	router.HandleFunc("/expenses/{id}", expenseHandler.DeleteExpense).Methods("DELETE")
+	router.HandleFunc("/dashboard", expenseHandler.GetDashboardSummary).Methods("GET")
+	router.HandleFunc("/analytics/category", expenseHandler.GetCategorySummary).Methods(("GET"))
+	router.HandleFunc("/analytics/monthly", expenseHandler.GetMonthlySummary).Methods("GET")
+
 	log.Println("Server running on :8080")
 
 	log.Fatal(
