@@ -21,7 +21,10 @@ func main() {
 	router := mux.NewRouter()
 
 	expenseHandler := handlers.NewExpenseHandler()
+	userHandler := handlers.NewUserHandler()
 
+	router.HandleFunc("/auth/register", userHandler.Register).Methods("POST")
+	router.HandleFunc("/auth/login", userHandler.Login).Methods("POST")
 	router.HandleFunc("/expenses", expenseHandler.CreateExpense).Methods("POST")
 	router.HandleFunc("/expenses", expenseHandler.GetExpenses).Methods("GET")
 	router.HandleFunc("/expenses/{id}", expenseHandler.GetExpenseByID).Methods("GET")
@@ -30,6 +33,7 @@ func main() {
 	router.HandleFunc("/dashboard", expenseHandler.GetDashboardSummary).Methods("GET")
 	router.HandleFunc("/analytics/category", expenseHandler.GetCategorySummary).Methods(("GET"))
 	router.HandleFunc("/analytics/monthly", expenseHandler.GetMonthlySummary).Methods("GET")
+	router.HandleFunc("/expenses/recent", expenseHandler.GetRecentExpenses).Methods("GET")
 
 	log.Println("Server running on :8080")
 

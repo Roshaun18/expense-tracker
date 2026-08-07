@@ -159,3 +159,15 @@ func (h *ExpenseHandler) GetMonthlySummary(w http.ResponseWriter, r *http.Reques
 
 	json.NewEncoder(w).Encode(result)
 }
+
+func (h *ExpenseHandler) GetRecentExpenses(w http.ResponseWriter, r *http.Request) {
+	expenses, err := h.service.GetRecentExpenses()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	json.NewEncoder(w).Encode(expenses)
+}

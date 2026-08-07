@@ -11,6 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type ExpenseRepository struct {
@@ -224,4 +225,27 @@ func (r *ExpenseRepository) GetMonthlySummary() ([]models.MonthlySummary, error)
 	})
 
 	return result, nil
+}
+
+func (r *ExpenseRepository) GetRecentExpenses() ([]models.Expense, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	options := options.Find().SetSort(bson.D{
+		{Key: "date", Value: -1},
+	}).SetLimit(5)
+
+	cursor, err := r.Collection.Find(ctx, bson.M{}, options)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var expenses []models.Expense
+	err = cursor.All(ctx, &expenses)
+	if err != nil {
+		return nil, err
+	}
+
+	return expenses, nil
 }

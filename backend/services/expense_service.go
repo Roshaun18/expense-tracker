@@ -73,3 +73,7 @@ func (s *ExpenseService) GetCategorySummary() ([]models.CategorySummary, error) 
 func (s *ExpenseService) GetMonthlySummary() ([]models.MonthlySummary, error) {
 	return s.repo.GetMonthlySummary()
 }
+
+func (s *ExpenseService) GetRecentExpenses() ([]models.Expense, error) {
+	return s.repo.GetRecentExpenses()
+}
