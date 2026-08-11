@@ -3,6 +3,7 @@ package main
 import (
 	"expense-tracker-backend/config"
 	"expense-tracker-backend/handlers"
+	"expense-tracker-backend/middleware"
 	"log"
 	"net/http"
 	"os"
@@ -25,15 +26,16 @@ func main() {
 
 	router.HandleFunc("/auth/register", userHandler.Register).Methods("POST")
 	router.HandleFunc("/auth/login", userHandler.Login).Methods("POST")
-	router.HandleFunc("/expenses", expenseHandler.CreateExpense).Methods("POST")
-	router.HandleFunc("/expenses", expenseHandler.GetExpenses).Methods("GET")
-	router.HandleFunc("/expenses/{id}", expenseHandler.GetExpenseByID).Methods("GET")
-	router.HandleFunc("/expenses/{id}", expenseHandler.UpdateExpense).Methods("PUT")
-	router.HandleFunc("/expenses/{id}", expenseHandler.DeleteExpense).Methods("DELETE")
-	router.HandleFunc("/dashboard", expenseHandler.GetDashboardSummary).Methods("GET")
-	router.HandleFunc("/analytics/category", expenseHandler.GetCategorySummary).Methods(("GET"))
-	router.HandleFunc("/analytics/monthly", expenseHandler.GetMonthlySummary).Methods("GET")
-	router.HandleFunc("/expenses/recent", expenseHandler.GetRecentExpenses).Methods("GET")
+
+	router.Handle("/expenses", middleware.AuthMiddleware(http.HandlerFunc(expenseHandler.CreateExpense))).Methods("POST")
+	router.Handle("/expenses", middleware.AuthMiddleware(http.HandlerFunc(expenseHandler.GetExpenses))).Methods("GET")
+	router.Handle("/expenses/{id}", middleware.AuthMiddleware(http.HandlerFunc(expenseHandler.GetExpenseByID))).Methods("GET")
+	router.Handle("/expenses/{id}", middleware.AuthMiddleware(http.HandlerFunc(expenseHandler.UpdateExpense))).Methods("PUT")
+	router.Handle("/expenses/{id}", middleware.AuthMiddleware(http.HandlerFunc(expenseHandler.DeleteExpense))).Methods("DELETE")
+	router.Handle("/dashboard", middleware.AuthMiddleware(http.HandlerFunc(expenseHandler.GetDashboardSummary))).Methods("GET")
+	router.Handle("/analytics/category", middleware.AuthMiddleware(http.HandlerFunc(expenseHandler.GetCategorySummary))).Methods(("GET"))
+	router.Handle("/analytics/monthly", middleware.AuthMiddleware(http.HandlerFunc(expenseHandler.GetMonthlySummary))).Methods("GET")
+	router.Handle("/expenses/recent", middleware.AuthMiddleware(http.HandlerFunc(expenseHandler.GetRecentExpenses))).Methods("GET")
 
 	log.Println("Server running on :8080")
 

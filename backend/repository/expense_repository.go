@@ -33,11 +33,11 @@ func (r *ExpenseRepository) CreateExpense(expense *models.Expense) error {
 	return err
 }
 
-func (r *ExpenseRepository) GetExpenses() ([]models.Expense, error) {
+func (r *ExpenseRepository) GetExpenses(userID primitive.ObjectID) ([]models.Expense, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	cursor, err := r.Collection.Find(ctx, bson.M{})
+	cursor, err := r.Collection.Find(ctx, bson.M{"user_id": userID})
 	if err != nil {
 		return nil, err
 	}

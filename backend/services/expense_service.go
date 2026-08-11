@@ -6,6 +6,8 @@ import (
 
 	"expense-tracker-backend/models"
 	"expense-tracker-backend/repository"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type ExpenseService struct {
@@ -46,8 +48,8 @@ func (s *ExpenseService) CreateExpense(expense *models.Expense) error {
 	return s.repo.CreateExpense(expense)
 }
 
-func (s *ExpenseService) GetExpenses() ([]models.Expense, error) {
-	return s.repo.GetExpenses()
+func (s *ExpenseService) GetExpenses(userID primitive.ObjectID) ([]models.Expense, error) {
+	return s.repo.GetExpenses(userID)
 }
 
 func (s *ExpenseService) GetExpenseByID(id string) (*models.Expense, error) {
