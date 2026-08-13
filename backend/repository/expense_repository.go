@@ -53,17 +53,12 @@ func (r *ExpenseRepository) GetExpenses(userID primitive.ObjectID) ([]models.Exp
 	return expenses, nil
 }
 
-func (r *ExpenseRepository) GetExpenseByID(id string) (*models.Expense, error) {
+func (r *ExpenseRepository) GetExpenseByID(id primitive.ObjectID, userID primitive.ObjectID) (*models.Expense, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	objectID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return nil, err
-	}
-
 	var expense models.Expense
-	err = r.Collection.FindOne(ctx, bson.M{"_id": objectID}).Decode(&expense)
+	err := r.Collection.FindOne(ctx, bson.M{"_id": id, "user_id": userID}).Decode(&expense)
 
 	if err != nil {
 		return nil, err

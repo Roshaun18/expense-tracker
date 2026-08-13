@@ -98,7 +98,23 @@ func (h *ExpenseHandler) GetExpenses(w http.ResponseWriter, r *http.Request) {
 func (h *ExpenseHandler) GetExpenseByID(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 
-	expense, err := h.service.GetExpenseByID(id)
+	userID, ok := r.Context().Value(middleware.UserIDKey).(string)
+	if !ok || userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+	expenseID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		http.Error(w, "Invalid expense ID", http.StatusBadRequest)
+		return
+	}
+	userObjectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusUnauthorized)
+		return
+	}
+
+	expense, err := h.service.GetExpenseByID(expenseID, userObjectID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return

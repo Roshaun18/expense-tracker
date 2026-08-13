@@ -52,8 +52,8 @@ func (s *ExpenseService) GetExpenses(userID primitive.ObjectID) ([]models.Expens
 	return s.repo.GetExpenses(userID)
 }
 
-func (s *ExpenseService) GetExpenseByID(id string) (*models.Expense, error) {
-	return s.repo.GetExpenseByID(id)
+func (s *ExpenseService) GetExpenseByID(id primitive.ObjectID, userID primitive.ObjectID) (*models.Expense, error) {
+	return s.repo.GetExpenseByID(id, userID)
 }
 
 func (s *ExpenseService) UpdateExpense(id string, expense *models.Expense) error {
