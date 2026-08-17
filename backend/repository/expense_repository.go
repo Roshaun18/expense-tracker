@@ -67,14 +67,9 @@ func (r *ExpenseRepository) GetExpenseByID(id primitive.ObjectID, userID primiti
 	return &expense, nil
 }
 
-func (r *ExpenseRepository) UpdateExpense(id string, expense *models.Expense) error {
+func (r *ExpenseRepository) UpdateExpense(id primitive.ObjectID, userID primitive.ObjectID, expense *models.Expense) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-
-	objectID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return err
-	}
 
 	expense.UpdatedAt = time.Now()
 
@@ -90,31 +85,41 @@ func (r *ExpenseRepository) UpdateExpense(id string, expense *models.Expense) er
 		},
 	}
 
-	_, err = r.Collection.UpdateOne(ctx, bson.M{"_id": objectID}, update)
+	result, err := r.Collection.UpdateOne(ctx, bson.M{"_id": id, "user_id": userID}, update)
 
-	return err
-}
-
-func (r *ExpenseRepository) DeleteExpense(id string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}
 
-	_, err = r.Collection.DeleteOne(ctx, bson.M{
-		"_id": objectID,
-	})
-	return err
+	if result.MatchedCount == 0 {
+		return mongo.ErrNoDocuments
+	}
+
+	return nil
 }
 
-func (r *ExpenseRepository) GetDashboardSummary() (*models.DashboardSummary, error) {
+func (r *ExpenseRepository) DeleteExpense(id primitive.ObjectID, userID primitive.ObjectID) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	cursor, err := r.Collection.Find(ctx, bson.M{})
+	result, err := r.Collection.DeleteOne(ctx, bson.M{
+		"_id": id, "user_id": userID,
+	})
+	if err != nil {
+		return err
+	}
+
+	if result.DeletedCount == 0 {
+		return mongo.ErrNoDocuments
+	}
+	return nil
+}
+
+func (r *ExpenseRepository) GetDashboardSummary(userID primitive.ObjectID) (*models.DashboardSummary, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	cursor, err := r.Collection.Find(ctx, bson.M{"user_id": userID})
 	if err != nil {
 		return nil, err
 	}
@@ -145,14 +150,15 @@ func (r *ExpenseRepository) GetDashboardSummary() (*models.DashboardSummary, err
 	}, nil
 }
 
-func (r *ExpenseRepository) GetCategorySummary() ([]models.CategorySummary, error) {
+func (r *ExpenseRepository) GetCategorySummary(userID primitive.ObjectID) ([]models.CategorySummary, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	pipeline := mongo.Pipeline{
 		bson.D{
 			{Key: "$match", Value: bson.M{
-				"type": "expense",
+				"type":    "expense",
+				"user_id": userID,
 			}},
 		},
 		bson.D{
@@ -181,11 +187,11 @@ func (r *ExpenseRepository) GetCategorySummary() ([]models.CategorySummary, erro
 	return result, err
 }
 
-func (r *ExpenseRepository) GetMonthlySummary() ([]models.MonthlySummary, error) {
+func (r *ExpenseRepository) GetMonthlySummary(userID primitive.ObjectID) ([]models.MonthlySummary, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	cursor, err := r.Collection.Find(ctx, bson.M{})
+	cursor, err := r.Collection.Find(ctx, bson.M{"user_id": userID})
 	if err != nil {
 		return nil, err
 	}
@@ -222,7 +228,7 @@ func (r *ExpenseRepository) GetMonthlySummary() ([]models.MonthlySummary, error)
 	return result, nil
 }
 
-func (r *ExpenseRepository) GetRecentExpenses() ([]models.Expense, error) {
+func (r *ExpenseRepository) GetRecentExpenses(userID primitive.ObjectID) ([]models.Expense, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -230,7 +236,7 @@ func (r *ExpenseRepository) GetRecentExpenses() ([]models.Expense, error) {
 		{Key: "date", Value: -1},
 	}).SetLimit(5)
 
-	cursor, err := r.Collection.Find(ctx, bson.M{}, options)
+	cursor, err := r.Collection.Find(ctx, bson.M{"user_id": userID}, options)
 	if err != nil {
 		return nil, err
 	}

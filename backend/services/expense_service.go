@@ -56,26 +56,26 @@ func (s *ExpenseService) GetExpenseByID(id primitive.ObjectID, userID primitive.
 	return s.repo.GetExpenseByID(id, userID)
 }
 
-func (s *ExpenseService) UpdateExpense(id string, expense *models.Expense) error {
-	return s.repo.UpdateExpense(id, expense)
+func (s *ExpenseService) UpdateExpense(id primitive.ObjectID, userID primitive.ObjectID, expense *models.Expense) error {
+	return s.repo.UpdateExpense(id, userID, expense)
 }
 
-func (s *ExpenseService) DeleteExpense(id string) error {
-	return s.repo.DeleteExpense(id)
+func (s *ExpenseService) DeleteExpense(id primitive.ObjectID, userID primitive.ObjectID) error {
+	return s.repo.DeleteExpense(id, userID)
 }
 
-func (s *ExpenseService) GetDashboardSummary() (*models.DashboardSummary, error) {
-	return s.repo.GetDashboardSummary()
+func (s *ExpenseService) GetDashboardSummary(userID primitive.ObjectID) (*models.DashboardSummary, error) {
+	return s.repo.GetDashboardSummary(userID)
 }
 
-func (s *ExpenseService) GetCategorySummary() ([]models.CategorySummary, error) {
-	return s.repo.GetCategorySummary()
+func (s *ExpenseService) GetCategorySummary(userID primitive.ObjectID) ([]models.CategorySummary, error) {
+	return s.repo.GetCategorySummary(userID)
 }
 
-func (s *ExpenseService) GetMonthlySummary() ([]models.MonthlySummary, error) {
-	return s.repo.GetMonthlySummary()
+func (s *ExpenseService) GetMonthlySummary(userID primitive.ObjectID) ([]models.MonthlySummary, error) {
+	return s.repo.GetMonthlySummary(userID)
 }
 
-func (s *ExpenseService) GetRecentExpenses() ([]models.Expense, error) {
-	return s.repo.GetRecentExpenses()
+func (s *ExpenseService) GetRecentExpenses(userID primitive.ObjectID) ([]models.Expense, error) {
+	return s.repo.GetRecentExpenses(userID)
 }

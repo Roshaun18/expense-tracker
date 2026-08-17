@@ -2,14 +2,17 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 
 	"expense-tracker-backend/middleware"
 	"expense-tracker-backend/models"
 	"expense-tracker-backend/services"
+	"expense-tracker-backend/validators"
 )
 
 type ExpenseHandler struct {
@@ -45,6 +48,10 @@ func (h *ExpenseHandler) CreateExpense(w http.ResponseWriter, r *http.Request) {
 	err = json.NewDecoder(r.Body).Decode(&expense)
 	if err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	if err := validators.ValidateExpense(&expense); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	expense.UserID = objectID
@@ -116,7 +123,7 @@ func (h *ExpenseHandler) GetExpenseByID(w http.ResponseWriter, r *http.Request) 
 
 	expense, err := h.service.GetExpenseByID(expenseID, userObjectID)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
+		http.Error(w, "Expense Not Found", http.StatusNotFound)
 		return
 	}
 
@@ -131,17 +138,44 @@ func (h *ExpenseHandler) GetExpenseByID(w http.ResponseWriter, r *http.Request) 
 func (h *ExpenseHandler) UpdateExpense(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 
+	expenseID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		http.Error(w, "Invalid expense ID", http.StatusBadRequest)
+		return
+	}
+
+	userID, ok := r.Context().Value(middleware.UserIDKey).(string)
+	if !ok || userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	userObjectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusUnauthorized)
+		return
+	}
+
 	var expense models.Expense
 
-	err := json.NewDecoder(r.Body).Decode(&expense)
+	err = json.NewDecoder(r.Body).Decode(&expense)
 	if err != nil {
 		http.Error(w, "Invalid Request Body", http.StatusBadRequest)
 		return
 	}
+	if err := validators.ValidateExpense(&expense); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	expense.UserID = userObjectID
 
-	err = h.service.UpdateExpense(id, &expense)
+	err = h.service.UpdateExpense(expenseID, userObjectID, &expense)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			http.Error(w, "Expense not found", http.StatusNotFound)
+			return
+		}
+		http.Error(w, "Failed to update expense", http.StatusInternalServerError)
 		return
 	}
 
@@ -155,9 +189,30 @@ func (h *ExpenseHandler) UpdateExpense(w http.ResponseWriter, r *http.Request) {
 func (h *ExpenseHandler) DeleteExpense(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 
-	err := h.service.DeleteExpense(id)
+	expenseID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Invalid expense ID", http.StatusBadRequest)
+		return
+	}
+	userID, ok := r.Context().Value(middleware.UserIDKey).(string)
+	if !ok || userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	userObjectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusUnauthorized)
+		return
+	}
+
+	err = h.service.DeleteExpense(expenseID, userObjectID)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			http.Error(w, "Expense not found", http.StatusNotFound)
+			return
+		}
+		http.Error(w, "Failed to delete expense", http.StatusInternalServerError)
 		return
 	}
 
@@ -169,7 +224,19 @@ func (h *ExpenseHandler) DeleteExpense(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *ExpenseHandler) GetDashboardSummary(w http.ResponseWriter, r *http.Request) {
-	summary, err := h.service.GetDashboardSummary()
+	userID, ok := r.Context().Value(middleware.UserIDKey).(string)
+	if !ok || userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	userObjectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusUnauthorized)
+		return
+	}
+
+	summary, err := h.service.GetDashboardSummary(userObjectID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -181,7 +248,19 @@ func (h *ExpenseHandler) GetDashboardSummary(w http.ResponseWriter, r *http.Requ
 }
 
 func (h *ExpenseHandler) GetCategorySummary(w http.ResponseWriter, r *http.Request) {
-	result, err := h.service.GetCategorySummary()
+	userID, ok := r.Context().Value(middleware.UserIDKey).(string)
+	if !ok || userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	userObjectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusUnauthorized)
+		return
+	}
+
+	result, err := h.service.GetCategorySummary(userObjectID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -193,7 +272,19 @@ func (h *ExpenseHandler) GetCategorySummary(w http.ResponseWriter, r *http.Reque
 }
 
 func (h *ExpenseHandler) GetMonthlySummary(w http.ResponseWriter, r *http.Request) {
-	result, err := h.service.GetMonthlySummary()
+	userID, ok := r.Context().Value(middleware.UserIDKey).(string)
+	if !ok || userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	userObjectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusUnauthorized)
+		return
+	}
+
+	result, err := h.service.GetMonthlySummary(userObjectID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -205,7 +296,19 @@ func (h *ExpenseHandler) GetMonthlySummary(w http.ResponseWriter, r *http.Reques
 }
 
 func (h *ExpenseHandler) GetRecentExpenses(w http.ResponseWriter, r *http.Request) {
-	expenses, err := h.service.GetRecentExpenses()
+	userID, ok := r.Context().Value(middleware.UserIDKey).(string)
+	if !ok || userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	userObjectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusUnauthorized)
+		return
+	}
+
+	expenses, err := h.service.GetRecentExpenses(userObjectID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
