@@ -1,35 +1,32 @@
-import { LoginForm, RegisterForm } from "../types/auth";
+import * as SecureStore from "expo-secure-store";
+import { LoginForm } from "../types/auth";
+import { apiRequest } from "./api";
 
 class AuthService {
   async login(data: LoginForm) {
-    // TODO:
-    // Replace this with the backend API call.
+    const response = await apiRequest("/auth/login", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
 
-    console.log("Login Request:", data);
+    await SecureStore.setItemAsync("token", response.token);
 
-    return {
-      success: true,
-      message: "Login successful",
-    };
+    return response;
   }
 
-  async register(data: RegisterForm) {
-    // TODO:
-    // Replace this with the backend API call.
-
-    console.log("Register Request:", data);
-
-    return {
-      success: true,
-      message: "Registration successful",
-    };
+  async register(data: {
+    name: string;
+    email: string;
+    password: string;
+  }) {
+    return await apiRequest("/auth/register", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
   }
 
   async logout() {
-    // TODO:
-    // Remove token and call backend if needed.
-
-    console.log("Logout");
+    await SecureStore.deleteItemAsync("token");
   }
 }
 

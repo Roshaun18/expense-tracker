@@ -242,7 +242,7 @@ func (r *ExpenseRepository) GetRecentExpenses(userID primitive.ObjectID) ([]mode
 	}
 	defer cursor.Close(ctx)
 
-	var expenses []models.Expense
+	expenses := make([]models.Expense, 0)
 	err = cursor.All(ctx, &expenses)
 	if err != nil {
 		return nil, err

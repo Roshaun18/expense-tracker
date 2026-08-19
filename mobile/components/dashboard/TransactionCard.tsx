@@ -10,7 +10,19 @@ import {
   radius,
 } from "../../theme";
 
-export default function TransactionCard() {
+import { Expense } from "../../services/expenseService";
+
+interface TransactionCardProps {
+  expenses: Expense[];
+  loading: boolean;
+  error: string;
+}
+
+export default function TransactionCard({
+  expenses,
+  loading,
+  error,
+}: TransactionCardProps) {
   return (
     <View style={styles.card}>
       <View style={styles.header}>
@@ -24,27 +36,36 @@ export default function TransactionCard() {
           </Text>
         </Pressable>
       </View>
+      {loading && (
+        <Text style={styles.info}>
+          Loading transactions...
+        </Text>
+      )}
 
-      <TransactionItem
-        title="Salary"
-        category="Income"
-        amount={45000}
-        type="income"
-      />
+      {!loading && error !== "" && (
+        <Text style={styles.error}>
+          {error}
+        </Text>
+      )}
 
-      <TransactionItem
-        title="Starbucks"
-        category="Food & Drinks"
-        amount={220}
-        type="expense"
-      />
+      {!loading && error === "" && (expenses?.length ?? 0) === 0 && (
+        <Text style={styles.info}>
+          No transactions yet.
+        </Text>
+      )}
 
-      <TransactionItem
-        title="Netflix"
-        category="Subscription"
-        amount={649}
-        type="expense"
-      />
+      {!loading &&
+        error === "" &&
+        expenses?.map((expense) => (
+          <TransactionItem
+            key={expense.id}
+            title={expense.title}
+            category={expense.category}
+            amount={expense.amount}
+            type={expense.type}
+          />
+        ))}
+      
     </View>
   );
 }
@@ -77,5 +98,19 @@ const styles = StyleSheet.create({
   viewAll: {
     color: colors.primary,
     fontSize: typography.size.sm,
+  },
+
+  info: {
+    color: colors.textSecondary,
+    fontSize: typography.size.sm,
+    textAlign: "center",
+    paddingVertical: spacing.md,
+  },
+
+  error: {
+    color: colors.danger,
+    fontSize: typography.size.sm,
+    textAlign: "center",
+    paddingVertical: spacing.md,
   },
 });

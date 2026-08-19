@@ -1,6 +1,13 @@
 import { useState } from "react";
+import { router } from "expo-router";
 
-import { RegisterErrors, RegisterForm } from "../types/auth";
+import authService from "../services/authService";
+
+import {
+  RegisterErrors,
+  RegisterForm,
+} from "../types/auth";
+
 import {
   validateStep1,
   validateStep2,
@@ -9,7 +16,8 @@ import {
 
 export default function useRegister() {
   const [step, setStep] = useState(1);
-
+  const [loading, setLoading] = useState(false);
+  const [serverError, setServerError] = useState("");
   const [form, setForm] = useState<RegisterForm>({
     fullName: "",
     email: "",
@@ -71,10 +79,38 @@ export default function useRegister() {
     setStep((prev) => prev - 1);
   };
 
+  const register = async () => {
+    try {
+      setLoading(true);
+      setServerError("");
+
+      const response = await authService.register({
+        name: form.fullName,
+        email: form.email,
+        password: form.password,
+      });
+
+      console.log("Registration successful:", response);
+
+      router.replace("/(auth)/login");
+    } catch (error) {
+      console.error("Registration error:", error);
+      if (error instanceof Error) {
+    setServerError(error.message);
+  } else {
+    setServerError("Registration failed. Please try again.");
+  }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     form,
     errors,
     step,
+    loading,
+    serverError,
 
     setStep,
     setForm,
@@ -82,5 +118,6 @@ export default function useRegister() {
     updateField,
     nextStep,
     previousStep,
+    register,
   };
 }

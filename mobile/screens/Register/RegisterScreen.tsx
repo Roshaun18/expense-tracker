@@ -1,235 +1,288 @@
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+} from "react-native";
+
 import ScreenBackground from "../../components/common/ScreenBackground";
 import GlassCard from "../../components/common/GlassCard";
 import TextField from "../../components/common/TextField";
 import PrimaryButton from "../../components/common/PrimaryButton";
-import { router } from "expo-router";
-import { colors, spacing, typography } from "../../theme";
 import StepIndicator from "../../components/common/StepIndicator";
 import Chip from "../../components/common/Chip";
-import { RegisterForm } from "../../types/auth";
+
+import { router } from "expo-router";
+
+import {
+  colors,
+  spacing,
+  typography,
+} from "../../theme";
+
 import useRegister from "../../hooks/useRegister";
 
 export default function RegisterScreen() {
-    const {
-  form,
-  errors,
-  step,
-  updateField,
-  nextStep,
-  previousStep,
-} = useRegister();
+  const {
+    form,
+    errors,
+    step,
+    loading,
+    serverError,
+    updateField,
+    nextStep,
+    previousStep,
+    register,
+  } = useRegister();
+
   return (
     <ScreenBackground>
-      <ScrollView contentContainerStyle={styles.container}
-      showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled">
-        <Text style={styles.logo}>Expense Tracker</Text>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Text style={styles.logo}>
+          Expense Tracker
+        </Text>
 
-        <Text style={styles.title}>Create Account</Text>
+        <Text style={styles.title}>
+          Create Account
+        </Text>
 
         <Text style={styles.subtitle}>
           Create an account to start tracking your expenses
         </Text>
+
         <StepIndicator currentStep={step} />
+
         <GlassCard>
-            {step===1 && (
-                <>
-                <TextField
-            label="Full Name"
-            placeholder="John Doe"
-            value={form.fullName}
-            error={errors.fullName}
-            onChangeText={(text) =>
-                updateField("fullName", text)
-            } 
-          />
 
-          <TextField
-            label="Email"
-            placeholder="john@example.com"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            value={form.email}
-            error={errors.email}
-            onChangeText={(text) =>
-                updateField("email",text)
-            }
-          />
+          {/* STEP 1 */}
 
-          <TextField
-          label="Phone Number"
-          placeholder="+91 9876543210"
-          keyboardType="phone-pad"
-          value={form.phone}
-          error={errors.phone}
-            onChangeText={(text) =>
-                updateField("phone",text)
-            }
-          />
-
-          <PrimaryButton
-          title="Continue"
-          onPress={nextStep}
-          />
-         </>
-        )}
-
-        {step===2 &&(
+          {step === 1 && (
             <>
-            <TextField
-            label="Password"
-            placeholder="••••••••"
-            secureTextEntry
-            value={form.password}
-            error={errors.password}
-  onChangeText={(text) =>
-    updateField("password",text)
-  }
-          />
+              <TextField
+                label="Full Name"
+                placeholder="John Doe"
+                value={form.fullName}
+                error={errors.fullName}
+                onChangeText={(text) =>
+                  updateField("fullName", text)
+                }
+              />
 
-          <TextField
-            label="Confirm Password"
-            placeholder="••••••••"
-            secureTextEntry
-            value={form.confirmPassword}
-            error={errors.confirmPassword}
-  onChangeText={(text) =>
-    updateField("confirmPassword",text)
-  }
-          />
-          <View style={styles.passwordRequirements}>
-      <Text style={styles.requirement}>
-        • At least 8 characters
-      </Text>
-    </View>
-     <View style={styles.buttonRow}>
-      <PrimaryButton
-        title="Back"
-        style={{flex:1}}
-        onPress={previousStep}
-      />
+              <TextField
+                label="Email"
+                placeholder="john@example.com"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                value={form.email}
+                error={errors.email}
+                onChangeText={(text) =>
+                  updateField("email", text)
+                }
+              />
 
-      <PrimaryButton
-        title="Continue"
-        style={{flex:1}}
-        onPress={nextStep}
-      />
-    </View>
+              <TextField
+                label="Phone Number"
+                placeholder="+91 9876543210"
+                keyboardType="phone-pad"
+                value={form.phone}
+                error={errors.phone}
+                onChangeText={(text) =>
+                  updateField("phone", text)
+                }
+              />
+
+              <PrimaryButton
+                title="Continue"
+                onPress={nextStep}
+              />
             </>
-        )}
+          )}
 
-    {step===3 &&(
-        <>
-        <Text
-      style={{
-        color: colors.textPrimary,
-        fontSize: typography.size.lg,
-        fontWeight: typography.weight.semibold,
-        marginBottom: spacing.md,
-      }}
-    >
-      Preferred Currency
-    </Text>
+          {/* STEP 2 */}
 
-    <View style={styles.chipContainer}>
-      {["INR", "EUR", "USD", "GBP"].map((currency) => (
-        <Chip
-          key={currency}
-          title={currency}
-          selected={form.currency === currency}
-          onPress={() =>
-            updateField("currency",currency)
-          }
-        />
-      ))}
-    </View>
+          {step === 2 && (
+            <>
+              <TextField
+                label="Password"
+                placeholder="••••••••"
+                secureTextEntry
+                value={form.password}
+                error={errors.password}
+                onChangeText={(text) =>
+                  updateField("password", text)
+                }
+              />
 
-    <Text
-      style={{
-        color: colors.textPrimary,
-        fontSize: typography.size.lg,
-        fontWeight: typography.weight.semibold,
-        marginBottom: spacing.md,
-      }}
-    >
-      Interests
-    </Text>
+              <TextField
+                label="Confirm Password"
+                placeholder="••••••••"
+                secureTextEntry
+                value={form.confirmPassword}
+                error={errors.confirmPassword}
+                onChangeText={(text) =>
+                  updateField(
+                    "confirmPassword",
+                    text
+                  )
+                }
+              />
 
-    <View style={styles.chipContainer}>
-      {[
-        "Budgeting",
-        "Saving",
-        "Investing",
-        "Travel",
-        "Crypto",
-        "Business",
-      ].map((interest) => (
-        <Chip
-          key={interest}
-          title={interest}
-          selected={form.interests.includes(interest)}
-          onPress={() => {
-            if (form.interests.includes(interest)) {
-              updateField("interests",
-                form.interests.filter((i)=>i!==interest),
-              );
-            } else {
-              updateField(
-                "interests",[
-                ...form.interests,interest
-              ]);
-            }
-          }}
-        />
-      ))}
-    </View>
+              <View style={styles.passwordRequirements}>
+                <Text style={styles.requirement}>
+                  • At least 8 characters
+                </Text>
+              </View>
 
-    <View style={styles.buttonRow}>
-      <PrimaryButton
-        title="Back"
-        style={{ flex: 1 }}
-        onPress={previousStep}
-      />
+              <View style={styles.buttonRow}>
+                <PrimaryButton
+                  title="Back"
+                  style={{ flex: 1 }}
+                  onPress={previousStep}
+                />
 
-      <PrimaryButton
-        title="Continue"
-        style={{ flex: 1 }}
-        onPress={nextStep}
-      />
-    </View>
-        </>
+                <PrimaryButton
+                  title="Continue"
+                  style={{ flex: 1 }}
+                  onPress={nextStep}
+                />
+              </View>
+            </>
+          )}
+
+          {/* STEP 3 */}
+
+          {step === 3 && (
+            <>
+              <Text style={styles.sectionTitle}>
+                Preferred Currency
+              </Text>
+
+              <View style={styles.chipContainer}>
+                {["INR", "EUR", "USD", "GBP"].map(
+                  (currency) => (
+                    <Chip
+                      key={currency}
+                      title={currency}
+                      selected={
+                        form.currency === currency
+                      }
+                      onPress={() =>
+                        updateField(
+                          "currency",
+                          currency
+                        )
+                      }
+                    />
+                  )
+                )}
+              </View>
+
+              <Text style={styles.sectionTitle}>
+                Interests
+              </Text>
+
+              <View style={styles.chipContainer}>
+                {[
+                  "Budgeting",
+                  "Saving",
+                  "Investing",
+                  "Travel",
+                  "Crypto",
+                  "Business",
+                ].map((interest) => (
+                  <Chip
+                    key={interest}
+                    title={interest}
+                    selected={form.interests.includes(
+                      interest
+                    )}
+                    onPress={() => {
+                      if (
+                        form.interests.includes(
+                          interest
+                        )
+                      ) {
+                        updateField(
+                          "interests",
+                          form.interests.filter(
+                            (i) => i !== interest
+                          )
+                        );
+                      } else {
+                        updateField(
+                          "interests",
+                          [
+                            ...form.interests,
+                            interest,
+                          ]
+                        );
+                      }
+                    }}
+                  />
+                ))}
+              </View>
+
+              <View style={styles.buttonRow}>
+                <PrimaryButton
+                  title="Back"
+                  style={{ flex: 1 }}
+                  onPress={previousStep}
+                />
+
+                <PrimaryButton
+                  title="Continue"
+                  style={{ flex: 1 }}
+                  onPress={nextStep}
+                />
+              </View>
+            </>
+          )}
+
+          {/* STEP 4 */}
+
+          {step === 4 && (
+            <>
+              <Text style={styles.finishTitle}>
+                You're All Set!
+              </Text>
+
+              {serverError !== "" && (
+      <Text style={styles.serverError}>
+        {serverError}
+      </Text>
     )}
 
-    {step===4 && (
-        <>
-        <Text
-      style={styles.finishTitle}
-    >
-      You're All Set!
-    </Text>
-     <View style={styles.buttonRow}>
-      <PrimaryButton
-        title="Back"
-        style={{ flex: 1 }}
-        onPress={previousStep}
-      />
+              <View style={styles.buttonRow}>
+                <PrimaryButton
+                  title="Back"
+                  style={{ flex: 1 }}
+                  onPress={previousStep}
+                />
 
-      <PrimaryButton
-        title="Create Account"
-        style={{ flex: 1 }}
-        onPress={() => {
-          console.log(form);
-        }}
-      />
-    </View>
-        </>
-    )}
+                <PrimaryButton
+                  title="Create Account"
+                  style={{ flex: 1 }}
+                  loading={loading}
+                  onPress={register}
+                />
+              </View>
+            </>
+          )}
+
         </GlassCard>
 
         <Text style={styles.footer}>
           Already have an account?{" "}
-          <Text style={styles.signIn} onPress={()=>router.back()}>Sign In</Text>
+          <Text
+            style={styles.signIn}
+            onPress={() => router.back()}
+          >
+            Sign In
+          </Text>
         </Text>
       </ScrollView>
     </ScreenBackground>
@@ -281,33 +334,47 @@ const styles = StyleSheet.create({
   },
 
   passwordRequirements: {
-  marginBottom: spacing.xl,
-},
+    marginBottom: spacing.xl,
+  },
 
-requirement: {
-  color: colors.textSecondary,
-  fontSize: typography.size.sm,
-  marginBottom: spacing.s,
-},
+  requirement: {
+    color: colors.textSecondary,
+    fontSize: typography.size.sm,
+    marginBottom: spacing.s,
+  },
 
-buttonRow: {
-  flexDirection: "row",
-  justifyContent: "space-between",
-  gap: spacing.md,
-},
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: spacing.md,
+  },
 
-chipContainer: {
-  flexDirection: "row",
-  flexWrap: "wrap",
-  gap: spacing.sm,
-  marginBottom: spacing.xl,
-},
+  chipContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    marginBottom: spacing.xl,
+  },
 
-finishTitle: {
-  color: colors.textPrimary,
-  fontSize: typography.size.xxl,
-  fontWeight: typography.weight.bold,
+  sectionTitle: {
+    color: colors.textPrimary,
+    fontSize: typography.size.lg,
+    fontWeight: typography.weight.semibold,
+    marginBottom: spacing.md,
+  },
+
+  finishTitle: {
+    color: colors.textPrimary,
+    fontSize: typography.size.xxl,
+    fontWeight: typography.weight.bold,
+    textAlign: "center",
+    marginBottom: spacing.sm,
+  },
+
+  serverError: {
+  color: colors.danger,
   textAlign: "center",
-  marginBottom: spacing.sm,
+  marginBottom: spacing.md,
+  fontSize: typography.size.sm,
 },
 });

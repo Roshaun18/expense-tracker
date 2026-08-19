@@ -27,6 +27,7 @@ func main() {
 	router.HandleFunc("/auth/register", userHandler.Register).Methods("POST")
 	router.HandleFunc("/auth/login", userHandler.Login).Methods("POST")
 
+	router.Handle("/expenses/recent", middleware.AuthMiddleware(http.HandlerFunc(expenseHandler.GetRecentExpenses))).Methods("GET")
 	router.Handle("/expenses", middleware.AuthMiddleware(http.HandlerFunc(expenseHandler.CreateExpense))).Methods("POST")
 	router.Handle("/expenses", middleware.AuthMiddleware(http.HandlerFunc(expenseHandler.GetExpenses))).Methods("GET")
 	router.Handle("/expenses/{id}", middleware.AuthMiddleware(http.HandlerFunc(expenseHandler.GetExpenseByID))).Methods("GET")
@@ -35,7 +36,6 @@ func main() {
 	router.Handle("/dashboard", middleware.AuthMiddleware(http.HandlerFunc(expenseHandler.GetDashboardSummary))).Methods("GET")
 	router.Handle("/analytics/category", middleware.AuthMiddleware(http.HandlerFunc(expenseHandler.GetCategorySummary))).Methods(("GET"))
 	router.Handle("/analytics/monthly", middleware.AuthMiddleware(http.HandlerFunc(expenseHandler.GetMonthlySummary))).Methods("GET")
-	router.Handle("/expenses/recent", middleware.AuthMiddleware(http.HandlerFunc(expenseHandler.GetRecentExpenses))).Methods("GET")
 
 	log.Println("Server running on :8080")
 

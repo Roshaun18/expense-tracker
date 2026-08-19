@@ -1,5 +1,5 @@
 import { useState } from "react";
-
+import { router } from "expo-router";
 import { LoginErrors, LoginForm } from "../types/auth";
 import authService from "../services/authService";
 import {
@@ -50,12 +50,11 @@ export default function useLogin() {
 
       const response = await authService.login(form);
 
-      console.log(response);
+      console.log("Login successful:",response);
 
-      // Later:
-      // router.replace("/dashboard");
+      router.replace("/(tabs)");
     } catch (error) {
-      console.error(error);
+      console.error("Login error:",error);
     } finally {
       setLoading(false);
     }

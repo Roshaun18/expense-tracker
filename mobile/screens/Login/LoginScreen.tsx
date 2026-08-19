@@ -50,7 +50,7 @@ export default function LoginScreen() {
           <PrimaryButton
           title="Sign In"
           loading={loading}
-          onPress={()=>router.replace("/(tabs)")}
+          onPress={login}
 />
         </GlassCard>
 
