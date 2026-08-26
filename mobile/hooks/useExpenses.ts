@@ -1,31 +1,33 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useFocusEffect } from "expo-router";
+
 import expenseService, {
   Expense,
 } from "../services/expenseService";
 
-export default function useRecentExpenses() {
+export default function useExpenses() {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const loadRecentExpenses = useCallback(async () => {
+  const loadExpenses = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
 
-      const data = await expenseService.getRecentExpenses();
+      const data = await expenseService.getExpenses();
+
+      console.log("All expenses:", data);
 
       setExpenses(data ?? []);
     } catch (error) {
-      console.error("Recent expenses error:", error);
+      console.error("Expenses error:", error);
 
       if (error instanceof Error) {
         setError(error.message);
       } else {
-        setError("Failed to load recent transactions");
+        setError("Failed to load expenses");
       }
-      setExpenses([]);
     } finally {
       setLoading(false);
     }
@@ -33,14 +35,14 @@ export default function useRecentExpenses() {
 
   useFocusEffect(
     useCallback(() => {
-    loadRecentExpenses();
-  }, [loadRecentExpenses])
-);
+      loadExpenses();
+    }, [loadExpenses])
+  );
 
   return {
     expenses,
     loading,
     error,
-    refresh: loadRecentExpenses,
+    refresh: loadExpenses,
   };
 }

@@ -1,4 +1,4 @@
-import { TouchableOpacity, Text, StyleSheet } from "react-native";
+import { TouchableOpacity, Text, StyleSheet, ActivityIndicator,} from "react-native";
 
 import {
   colors,
@@ -9,22 +9,34 @@ import {
 
 type Props = {
   title: string;
+  loading?: boolean;
   onPress: () => void;
 };
 
 export default function SaveButton({
   title,
+  loading = false,
   onPress,
 }: Props) {
   return (
     <TouchableOpacity
-      style={styles.button}
+      style={[
+        styles.button,
+        loading && styles.disabled,
+      ]}
       activeOpacity={0.9}
       onPress={onPress}
     >
-      <Text style={styles.text}>
-        {title}
-      </Text>
+      {loading ? (
+        <ActivityIndicator
+          size="small"
+          color={colors.background}
+        />
+      ) : (
+        <Text style={styles.text}>
+          {title}
+        </Text>
+      )}
     </TouchableOpacity>
   );
 }
@@ -48,5 +60,8 @@ const styles = StyleSheet.create({
     color: colors.background,
     fontSize: typography.size.lg,
     fontWeight: typography.weight.bold,
+  },
+  disabled: {
+    opacity: 0.6,
   },
 });

@@ -1,47 +1,90 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import SearchBar from "../../components/history/SearchBar";
 import ScreenBackground from "../../components/common/ScreenBackground";
 import ScreenHeader from "../../components/common/ScreenHeader";
 import FilterChips from "../../components/history/FilterChip";
-import { ScrollView, StyleSheet } from "react-native";
+import { ScrollView, StyleSheet, Text } from "react-native";
 import HistoryCard from "../../components/history/HistoryCard";
-import { spacing } from "../../theme";
+import { spacing, colors, typography } from "../../theme";
+import { Expense } from "../../services/expenseService";
 
-export default function HistoryScreen() {
+interface HistoryScreenProps {
+  expenses: Expense[];
+  loading: boolean;
+  error: string;
+}
+
+export default function HistoryScreen({
+  expenses,
+  loading,
+  error,
+}: HistoryScreenProps) {
     const [search, setSearch] = useState("");
     const [filter, setFilter] = useState<
   "all" | "income" | "expense"
 >("all");
 
-const todayTransactions = [
-  {
-    title: "Salary",
-    category: "Income",
-    amount: 15000,
-    type: "income" as const,
-  },
-  {
-    title: "Coffee",
-    category: "Food",
-    amount: 250,
-    type: "expense" as const,
-  },
-];
+const filteredExpenses = useMemo(() => {
+    return expenses.filter((expense) => {
+      const searchText = search.toLowerCase();
 
-const yesterdayTransactions = [
-  {
-    title: "Shopping",
-    category: "Lifestyle",
-    amount: 1200,
-    type: "expense" as const,
-  },
-  {
-    title: "Freelance",
-    category: "Income",
-    amount: 5000,
-    type: "income" as const,
-  },
-];
+        const matchesSearch =
+        expense.title.toLowerCase().includes(searchText) ||
+        expense.category.toLowerCase().includes(searchText);
+
+      const matchesFilter =
+        filter === "all" ||
+        expense.type === filter;
+
+      return matchesSearch && matchesFilter;
+    });
+  }, [expenses, search, filter]);
+
+  const groupedExpenses = useMemo(() => {
+    const groups: Record<string, Expense[]> = {};
+
+    filteredExpenses.forEach((expense) => {
+      const date = new Date(expense.date);
+
+      const key = date.toDateString();
+
+      if (!groups[key]) {
+        groups[key] = [];
+      }
+
+      groups[key].push(expense);
+    });
+
+    return Object.entries(groups).sort(
+      ([dateA], [dateB]) =>
+        new Date(dateB).getTime() -
+        new Date(dateA).getTime()
+    );
+  }, [filteredExpenses]);
+
+  // Convert date into Today / Yesterday / actual date
+  const getDateLabel = (dateString: string) => {
+    const date = new Date(dateString);
+
+  const today = new Date();
+
+  const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+
+    if (date.toDateString() === today.toDateString()) {
+      return "Today";
+    }
+
+    if (date.toDateString() === yesterday.toDateString()) {
+      return "Yesterday";
+    }
+
+    return date.toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  };
 
   return (
     <ScreenBackground>
@@ -58,15 +101,45 @@ const yesterdayTransactions = [
   selected={filter}
   onSelect={setFilter}
 />
-<HistoryCard
-  title="Today"
-  transactions={todayTransactions}
-/>
 
-<HistoryCard
-  title="Yesterday"
-  transactions={yesterdayTransactions}
-/>
+{loading && (
+          <Text style={styles.info}>
+            Loading transactions...
+          </Text>
+        )}
+
+        {!loading && error !== "" && (
+          <Text style={styles.error}>
+            {error}
+          </Text>
+        )}
+
+        {!loading &&
+          error === "" &&
+          filteredExpenses.length === 0 && (
+            <Text style={styles.info}>
+              No transactions found.
+            </Text>
+          )}
+
+        {!loading &&
+          error === "" &&
+          groupedExpenses.map(
+            ([date, transactions]) => (
+              <HistoryCard
+                key={date}
+                title={getDateLabel(date)}
+                transactions={transactions.map(
+                  (expense) => ({
+                    title: expense.title,
+                    category: expense.category,
+                    amount: expense.amount,
+                    type: expense.type,
+                  })
+                )}
+              />
+            )
+          )}
       </ScrollView>
     </ScreenBackground>
   );
@@ -77,5 +150,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.lg,
     paddingBottom: spacing.xxxl,
+  },
+
+  info: {
+    color: colors.textSecondary,
+    fontSize: typography.size.sm,
+    textAlign: "center",
+    marginTop: spacing.xl,
+  },
+
+  error: {
+    color: colors.danger,
+    fontSize: typography.size.sm,
+    textAlign: "center",
+    marginTop: spacing.xl,
   },
 });

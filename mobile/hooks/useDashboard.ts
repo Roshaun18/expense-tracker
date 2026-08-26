@@ -1,4 +1,5 @@
-import {useEffect, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
+import { useFocusEffect } from "expo-router";
 import dashboardService, {
   DashboardSummary,
 } from "../services/dashboardService";
@@ -8,7 +9,7 @@ export default function useDashboard(){
     const [loading, setLoading]=useState(true);
     const [error, setError] = useState("");
 
-    const loadDashboard = async()=>{
+    const loadDashboard = useCallback(async()=>{
         try{
             setLoading(true);
             setError("");
@@ -26,11 +27,13 @@ export default function useDashboard(){
         }finally{
             setLoading(false);
         }
-    };
-
-    useEffect(()=>{
-        loadDashboard();
     },[]);
+
+    useFocusEffect(
+        useCallback(()=>{
+        loadDashboard();
+    },[loadDashboard])
+);
 
     return{
         summary,
