@@ -6,28 +6,44 @@ import {
   spacing,
   typography,
 } from "../../theme";
+import { CategorySummary } from "../../services/analyticsService";
 
-export default function CategorySpendingCard() {
-  const chartData = [
-  {
-    title: "Food & Dining",
-    value: 200,
-    startColor: colors.expense,
-    endColor: colors.danger,
-  },
-  {
-    title: "Shopping",
-    value: 120,
-    startColor: colors.primary,
-    endColor: colors.electric,
-  },
-  {
-    title: "Transport",
-    value: 280,
-    startColor: colors.violet,
-    endColor: colors.electric,
-  },
-];
+type Props = {
+  data: CategorySummary[];
+};
+
+export default function CategorySpendingCard({data}: Props) {
+  const categoryColors = [
+    {
+      startColor: colors.expense,
+      endColor: colors.danger,
+    },
+    {
+      startColor: colors.primary,
+      endColor: colors.electric,
+    },
+    {
+      startColor: colors.violet,
+      endColor: colors.electric,
+    },
+    {
+      startColor: colors.chartEntertainment,
+      endColor: colors.primary,
+    },
+    {
+      startColor: colors.chartTransport,
+      endColor: colors.electric,
+    },
+  ];
+  
+  const chartData = data.map((item, index) => ({
+    title: item.category,
+    value: item.amount,
+    startColor:
+      categoryColors[index % categoryColors.length].startColor,
+    endColor:
+      categoryColors[index % categoryColors.length].endColor,
+  }));
 
 const totalSpent = chartData.reduce(
   (sum, item) => sum + item.value,
@@ -41,21 +57,27 @@ const totalSpent = chartData.reduce(
         </Text>
 
         <Text style={styles.amount}>
-          ₹{totalSpent}
+          ₹{totalSpent.toLocaleString("en-IN")}
         </Text>
       </View>
 
       <View style={styles.chartPlaceholder}>
-        <DonutChart
-  centerValue={`₹${totalSpent}`}
-  centerTitle="Total"
-  data={chartData}
-/>
+        {chartData.length > 0 ? (
+          <DonutChart
+            centerValue={`₹${totalSpent.toLocaleString("en-IN")}`}
+            centerTitle="Total"
+            data={chartData}
+          />
+        ) : (
+          <Text style={styles.placeholderText}>
+            No spending data yet.
+          </Text>
+        )}
       </View>
 
       {chartData.map((item, index) => (
   <View
-    key={index}
+    key={`${item.title}-${index}`}
     style={styles.legend}
   >
     <View
@@ -72,7 +94,7 @@ const totalSpent = chartData.reduce(
     </Text>
 
     <Text style={styles.value}>
-      ₹{item.value}
+      ₹{item.value.toLocaleString("en-IN")}
     </Text>
   </View>
 ))}
@@ -118,6 +140,7 @@ const styles = StyleSheet.create({
 
   placeholderText: {
     color: colors.textSecondary,
+    fontSize: typography.size.sm,
   },
 
   legend: {

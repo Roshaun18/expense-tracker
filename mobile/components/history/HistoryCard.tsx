@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Pressable } from "react-native";
 
 import TransactionItem from "../dashboard/TransactionItem";
 
@@ -9,6 +9,7 @@ import {
 } from "../../theme";
 
 type Transaction = {
+  id: string;
   title: string;
   category: string;
   amount: number;
@@ -18,11 +19,13 @@ type Transaction = {
 type Props = {
   title: string;
   transactions: Transaction[];
+  onTransactionPress: (transaction: Transaction) => void;
 };
 
 export default function HistoryCard({
   title,
   transactions,
+  onTransactionPress,
 }: Props) {
   return (
     <View style={styles.container}>
@@ -31,19 +34,23 @@ export default function HistoryCard({
       </Text>
 
       {transactions.map((item, index) => (
-  <View key={index}>
-    <TransactionItem
-      title={item.title}
-      category={item.category}
-      amount={item.amount}
-      type={item.type}
-    />
+        <View key={item.id}>
+          <Pressable
+            onPress={() => onTransactionPress(item)}
+          >
+            <TransactionItem
+              title={item.title}
+              category={item.category}
+              amount={item.amount}
+              type={item.type}
+            />
+          </Pressable>
 
-    {index !== transactions.length - 1 && (
-      <View style={styles.divider} />
-    )}
-  </View>
-))}
+          {index !== transactions.length - 1 && (
+            <View style={styles.divider} />
+          )}
+        </View>
+      ))}
     </View>
   );
 }
@@ -57,13 +64,12 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontSize: typography.size.sm,
     fontWeight: typography.weight.bold,
-
     marginBottom: spacing.md,
   },
-  
+
   divider: {
-  height: 1,
-  backgroundColor: colors.border,
-  marginVertical: spacing.sm,
-},
+    height: 1,
+    backgroundColor: colors.border,
+    marginVertical: spacing.sm,
+  },
 });

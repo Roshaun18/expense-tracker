@@ -7,6 +7,7 @@ import { ScrollView, StyleSheet, Text } from "react-native";
 import HistoryCard from "../../components/history/HistoryCard";
 import { spacing, colors, typography } from "../../theme";
 import { Expense } from "../../services/expenseService";
+import { router } from "expo-router";
 
 interface HistoryScreenProps {
   expenses: Expense[];
@@ -131,12 +132,21 @@ const filteredExpenses = useMemo(() => {
                 title={getDateLabel(date)}
                 transactions={transactions.map(
                   (expense) => ({
+                    id: expense.id,
                     title: expense.title,
                     category: expense.category,
                     amount: expense.amount,
                     type: expense.type,
                   })
                 )}
+                onTransactionPress={(transaction) => {
+    router.push({
+      pathname: "/transaction/[id]",
+      params: {
+        id: transaction.id,
+      },
+    });
+  }}
               />
             )
           )}

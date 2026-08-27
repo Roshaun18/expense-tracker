@@ -42,6 +42,28 @@ class ExpenseService {
       body: JSON.stringify(data),
     });
   }
+
+  async getExpenseById(id: string): Promise<Expense> {
+  return await apiRequest(`/expenses/${id}`, {
+    method: "GET",
+  });
+}
+
+async updateExpense(
+  id: string,
+  data: CreateExpenseRequest
+): Promise<Expense> {
+  return await apiRequest(`/expenses/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
+async deleteExpense(id: string): Promise<void> {
+  await apiRequest(`/expenses/${id}`, {
+    method: "DELETE",
+  });
+}
 }
 
 export default new ExpenseService();
