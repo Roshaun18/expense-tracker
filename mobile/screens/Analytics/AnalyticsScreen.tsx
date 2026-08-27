@@ -8,6 +8,8 @@ import CategorySpendingCard from "../../components/analytics/CategorySpendingCar
 import StatsCard from "../../components/analytics/StatsCard";
 import SpendingTrendCard from "../../components/analytics/SpendTrendCard";
 import useCategoryAnalytics from "../../hooks/useCategoryAnalytics";
+import useMonthlyAnalytics from "../../hooks/useMonthlyAnalytics";
+import useDashboard from "../../hooks/useDashboard";
 
 export default function AnalyticsScreen() {
     const [period, setPeriod] = useState<"W" | "M" | "Y">("M");
@@ -16,6 +18,18 @@ export default function AnalyticsScreen() {
     loading,
     error,
   } = useCategoryAnalytics();
+
+  const {
+  summary,
+  loading: dashboardLoading,
+  error: dashboardError,
+} = useDashboard();
+
+  const {
+  data: monthlyData,
+  loading: monthlyLoading,
+  error: monthlyError,
+} = useMonthlyAnalytics();
 
     return (
     <ScreenBackground>
@@ -67,26 +81,24 @@ export default function AnalyticsScreen() {
               data={categoryData}
             />
 
-            <SpendingTrendCard />
+            <SpendingTrendCard data={monthlyData}/>
 
             <View style={styles.statsRow}>
               <StatsCard
-                title="Income"
-                amount="₹0"
-                icon="trending-down"
-                iconColor={colors.income}
-              />
+  title="Income"
+  amount={`₹${(summary?.totalIncome ?? 0).toLocaleString("en-IN")}`}
+  icon="trending-up"
+  iconColor={colors.income}
+/>
 
-              <View
-                style={{ width: spacing.md }}
-              />
+<View style={{ width: spacing.md }} />
 
-              <StatsCard
-                title="Expense"
-                amount="₹0"
-                icon="trending-up"
-                iconColor={colors.expense}
-              />
+<StatsCard
+  title="Expense"
+  amount={`₹${(summary?.totalExpense ?? 0).toLocaleString("en-IN")}`}
+  icon="trending-down"
+  iconColor={colors.expense}
+/>
             </View>
           </>
         )}

@@ -1,6 +1,8 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 
 import BarChart from "./BarChart";
+
+import { MonthlySummary } from "../../services/analyticsService";
 
 import {
   colors,
@@ -9,7 +11,42 @@ import {
   typography,
 } from "../../theme";
 
-export default function SpendingTrendCard() {
+type Props = {
+  data: MonthlySummary[];
+};
+
+const monthLabels = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
+export default function SpendingTrendCard({data}: Props) {
+  const income = monthLabels.map((_, index) => {
+    const month = data.find(
+      (item) => item.month === index + 1
+    );
+
+    return month?.income ?? 0;
+  });
+
+  const expense = monthLabels.map((_, index) => {
+    const month = data.find(
+      (item) => item.month === index + 1
+    );
+
+    return month?.expense ?? 0;
+  });
+
   return (
     <View style={styles.card}>
       <Text style={styles.subtitle}>
@@ -17,14 +54,19 @@ export default function SpendingTrendCard() {
       </Text>
 
       <Text style={styles.title}>
-        Weekly Income vs Expense
+        Monthly Income vs Expense
       </Text>
 
-      <BarChart
-        income={[420, 510, 380, 620, 480, 700, 560]}
-        expense={[260, 330, 300, 430, 360, 520, 410]}
-        labels={["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]}
-      />
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+      >
+        <BarChart
+          income={income}
+          expense={expense}
+          labels={monthLabels}
+        />
+      </ScrollView>
     </View>
   );
 }

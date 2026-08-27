@@ -38,7 +38,12 @@ const filteredExpenses = useMemo(() => {
         expense.type === filter;
 
       return matchesSearch && matchesFilter;
-    });
+    })
+    .sort(
+      (a, b) =>
+        new Date(b.date).getTime() -
+        new Date(a.date).getTime()
+    );
   }, [expenses, search, filter]);
 
   const groupedExpenses = useMemo(() => {

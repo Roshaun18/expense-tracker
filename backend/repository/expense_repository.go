@@ -208,7 +208,7 @@ func (r *ExpenseRepository) GetMonthlySummary(userID primitive.ObjectID) ([]mode
 	for _, expense := range expenses {
 		month := int(expense.Date.Month())
 		if _, exists := monthlyMap[month]; !exists {
-			monthlyMap[month] = &models.MonthlySummary{Month: month}
+			monthlyMap[month] = &models.MonthlySummary{Month: month, Income: 0, Expense: 0}
 		}
 		if expense.Type == "income" {
 			monthlyMap[month].Income += expense.Amount
@@ -216,7 +216,7 @@ func (r *ExpenseRepository) GetMonthlySummary(userID primitive.ObjectID) ([]mode
 			monthlyMap[month].Expense += expense.Amount
 		}
 	}
-	result := make([]models.MonthlySummary, 0)
+	result := make([]models.MonthlySummary, 0, len(monthlyMap))
 	for _, value := range monthlyMap {
 		result = append(result, *value)
 	}
