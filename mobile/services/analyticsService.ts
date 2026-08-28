@@ -12,11 +12,16 @@ export interface MonthlySummary {
 }
 
 class AnalyticsService {
-  async getCategorySummary(): Promise<CategorySummary[]> {
-    return await apiRequest("/analytics/category", {
+  async getCategorySummary(
+  period: "W" | "M" | "Y"
+): Promise<CategorySummary[]> {
+  return await apiRequest(
+    `/analytics/category?period=${period}`,
+    {
       method: "GET",
-    });
-  }
+    }
+  );
+}
 
   async getMonthlySummary(): Promise<MonthlySummary[]> {
   return await apiRequest("/analytics/monthly", {

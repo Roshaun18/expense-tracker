@@ -5,7 +5,9 @@ import analyticsService, {
   CategorySummary,
 } from "../services/analyticsService";
 
-export default function useCategoryAnalytics() {
+type Period = "W" | "M" | "Y";
+
+export default function useCategoryAnalytics(period: Period) {
   const [data, setData] = useState<CategorySummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -16,7 +18,7 @@ export default function useCategoryAnalytics() {
       setError("");
 
       const response =
-        await analyticsService.getCategorySummary();
+        await analyticsService.getCategorySummary(period);
 
       console.log("Category analytics:", response);
 
@@ -35,7 +37,7 @@ export default function useCategoryAnalytics() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [period]);
 
   useFocusEffect(
     useCallback(() => {

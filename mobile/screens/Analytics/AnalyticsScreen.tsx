@@ -17,7 +17,7 @@ export default function AnalyticsScreen() {
     data: categoryData,
     loading,
     error,
-  } = useCategoryAnalytics();
+  } = useCategoryAnalytics(period);
 
   const {
   summary,

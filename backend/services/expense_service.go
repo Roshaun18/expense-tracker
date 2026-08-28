@@ -68,8 +68,8 @@ func (s *ExpenseService) GetDashboardSummary(userID primitive.ObjectID) (*models
 	return s.repo.GetDashboardSummary(userID)
 }
 
-func (s *ExpenseService) GetCategorySummary(userID primitive.ObjectID) ([]models.CategorySummary, error) {
-	return s.repo.GetCategorySummary(userID)
+func (s *ExpenseService) GetCategorySummary(userID primitive.ObjectID, startDate time.Time, endDate time.Time) ([]models.CategorySummary, error) {
+	return s.repo.GetCategorySummary(userID, startDate, endDate)
 }
 
 func (s *ExpenseService) GetMonthlySummary(userID primitive.ObjectID) ([]models.MonthlySummary, error) {

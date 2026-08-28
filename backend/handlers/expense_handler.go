@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -260,7 +261,42 @@ func (h *ExpenseHandler) GetCategorySummary(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	result, err := h.service.GetCategorySummary(userObjectID)
+	period := r.URL.Query().Get("period")
+	if period == "" {
+		period = "M"
+	}
+
+	now := time.Now()
+
+	var startDate time.Time
+	var endDate time.Time
+
+	switch period {
+	case "W":
+		startDate = now.AddDate(0, 0, -int(now.Weekday()))
+		startDate = time.Date(startDate.Year(), startDate.Month(), startDate.Day(),
+			0, 0, 0, 0,
+			now.Location())
+		endDate = startDate.AddDate(0, 0, 7)
+	case "M":
+		startDate = time.Date(now.Year(), now.Month(),
+			1,
+			0, 0, 0, 0,
+			now.Location())
+		endDate = startDate.AddDate(0, 1, 0)
+	case "Y":
+		startDate = time.Date(now.Year(),
+			1,
+			1,
+			0, 0, 0, 0,
+			now.Location())
+		endDate = startDate.AddDate(1, 0, 0)
+	default:
+		http.Error(w, "Invalid period", http.StatusBadRequest)
+		return
+	}
+
+	result, err := h.service.GetCategorySummary(userObjectID, startDate, endDate)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -150,7 +150,7 @@ func (r *ExpenseRepository) GetDashboardSummary(userID primitive.ObjectID) (*mod
 	}, nil
 }
 
-func (r *ExpenseRepository) GetCategorySummary(userID primitive.ObjectID) ([]models.CategorySummary, error) {
+func (r *ExpenseRepository) GetCategorySummary(userID primitive.ObjectID, startDate time.Time, endDate time.Time) ([]models.CategorySummary, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -159,6 +159,10 @@ func (r *ExpenseRepository) GetCategorySummary(userID primitive.ObjectID) ([]mod
 			{Key: "$match", Value: bson.M{
 				"type":    "expense",
 				"user_id": userID,
+				"date": bson.M{
+					"$gte": startDate,
+					"$lt":  endDate,
+				},
 			}},
 		},
 		bson.D{
@@ -183,6 +187,9 @@ func (r *ExpenseRepository) GetCategorySummary(userID primitive.ObjectID) ([]mod
 	var result []models.CategorySummary
 
 	err = cursor.All(ctx, &result)
+	if err != nil {
+		return nil, err
+	}
 
 	return result, err
 }
