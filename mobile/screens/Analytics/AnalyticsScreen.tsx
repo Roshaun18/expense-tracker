@@ -9,7 +9,7 @@ import StatsCard from "../../components/analytics/StatsCard";
 import SpendingTrendCard from "../../components/analytics/SpendTrendCard";
 import useCategoryAnalytics from "../../hooks/useCategoryAnalytics";
 import useMonthlyAnalytics from "../../hooks/useMonthlyAnalytics";
-import useDashboard from "../../hooks/useDashboard";
+import usePeriodSummary from "../../hooks/usePeriodSummary";
 
 export default function AnalyticsScreen() {
     const [period, setPeriod] = useState<"W" | "M" | "Y">("M");
@@ -20,10 +20,10 @@ export default function AnalyticsScreen() {
   } = useCategoryAnalytics(period);
 
   const {
-  summary,
+  data: periodSummary,
   loading: dashboardLoading,
   error: dashboardError,
-} = useDashboard();
+} = usePeriodSummary(period);
 
   const {
   data: monthlyData,
@@ -86,7 +86,7 @@ export default function AnalyticsScreen() {
             <View style={styles.statsRow}>
               <StatsCard
   title="Income"
-  amount={`₹${(summary?.totalIncome ?? 0).toLocaleString("en-IN")}`}
+  amount={`₹${(periodSummary?.income ?? 0).toLocaleString("en-IN")}`}
   icon="trending-up"
   iconColor={colors.income}
 />
@@ -95,7 +95,7 @@ export default function AnalyticsScreen() {
 
 <StatsCard
   title="Expense"
-  amount={`₹${(summary?.totalExpense ?? 0).toLocaleString("en-IN")}`}
+  amount={`₹${(periodSummary?.expense ?? 0).toLocaleString("en-IN")}`}
   icon="trending-down"
   iconColor={colors.expense}
 />

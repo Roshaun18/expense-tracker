@@ -354,3 +354,79 @@ func (h *ExpenseHandler) GetRecentExpenses(w http.ResponseWriter, r *http.Reques
 
 	json.NewEncoder(w).Encode(expenses)
 }
+
+func (h *ExpenseHandler) GetPeriodSummary(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(middleware.UserIDKey).(string)
+
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	if userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	userObjectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusUnauthorized)
+		return
+	}
+
+	period := r.URL.Query().Get("period")
+	if period == "" {
+		period = "M"
+	}
+
+	now := time.Now()
+
+	var startDate time.Time
+	var endDate time.Time
+
+	switch period {
+	case "W":
+		startDate = now.AddDate(0, 0, -int(now.Weekday()))
+		startDate = time.Date(startDate.Year(),
+			startDate.Month(),
+			startDate.Day(),
+			0, 0, 0, 0,
+			now.Location())
+		endDate = startDate.AddDate(0, 0, 7)
+
+	case "M":
+		startDate = time.Date(
+			now.Year(),
+			now.Month(),
+			1,
+			0, 0, 0, 0,
+			now.Location(),
+		)
+		endDate = startDate.AddDate(0, 1, 0)
+
+	case "Y":
+		startDate = time.Date(
+			now.Year(),
+			1,
+			1,
+			0, 0, 0, 0,
+			now.Location(),
+		)
+		endDate = startDate.AddDate(1, 0, 0)
+
+	default:
+		http.Error(w, "Invalid period", http.StatusBadRequest)
+		return
+	}
+
+	result, err := h.service.GetPeriodSummary(userObjectID, startDate, endDate)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	json.NewEncoder(w).Encode(result)
+
+}

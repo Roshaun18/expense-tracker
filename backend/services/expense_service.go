@@ -79,3 +79,7 @@ func (s *ExpenseService) GetMonthlySummary(userID primitive.ObjectID) ([]models.
 func (s *ExpenseService) GetRecentExpenses(userID primitive.ObjectID) ([]models.Expense, error) {
 	return s.repo.GetRecentExpenses(userID)
 }
+
+func (s *ExpenseService) GetPeriodSummary(userID primitive.ObjectID, startDate time.Time, endDate time.Time) (*models.PeriodSummary, error) {
+	return s.repo.GetPeriodSummary(userID, startDate, endDate)
+}

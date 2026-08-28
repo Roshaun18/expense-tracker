@@ -36,6 +36,7 @@ func main() {
 	router.Handle("/dashboard", middleware.AuthMiddleware(http.HandlerFunc(expenseHandler.GetDashboardSummary))).Methods("GET")
 	router.Handle("/analytics/category", middleware.AuthMiddleware(http.HandlerFunc(expenseHandler.GetCategorySummary))).Methods(("GET"))
 	router.Handle("/analytics/monthly", middleware.AuthMiddleware(http.HandlerFunc(expenseHandler.GetMonthlySummary))).Methods("GET")
+	router.Handle("/analytics/summary", middleware.AuthMiddleware(http.HandlerFunc(expenseHandler.GetPeriodSummary))).Methods("GET")
 
 	log.Println("Server running on :8080")
 

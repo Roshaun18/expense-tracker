@@ -5,3 +5,8 @@ type MonthlySummary struct {
 	Income  float64 `json:"income"`
 	Expense float64 `json:"expense"`
 }
+
+type PeriodSummary struct {
+	Income  float64 `json:"income"`
+	Expense float64 `json:"expense"`
+}

@@ -257,3 +257,68 @@ func (r *ExpenseRepository) GetRecentExpenses(userID primitive.ObjectID) ([]mode
 
 	return expenses, nil
 }
+
+func (r *ExpenseRepository) GetPeriodSummary(userID primitive.ObjectID, startDate time.Time, endDate time.Time) (*models.PeriodSummary, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	pipeline := mongo.Pipeline{
+		bson.D{
+			{Key: "$match", Value: bson.M{
+				"user_id": userID,
+				"date": bson.M{
+					"$gte": startDate,
+					"$lt":  endDate,
+				},
+			}},
+		},
+		bson.D{
+			{Key: "$group", Value: bson.M{
+				"_id": nil,
+				"income": bson.M{
+					"$sum": bson.M{
+						"$cond": bson.A{
+							bson.M{"$eq": bson.A{"$type", "income"}},
+							"$amount",
+							0,
+						},
+					},
+				},
+				"expense": bson.M{
+					"$sum": bson.M{
+						"$cond": bson.A{
+							bson.M{"$eq": bson.A{"$type", "expense"}},
+							"$amount",
+							0,
+						},
+					},
+				},
+			}},
+		},
+		bson.D{
+			{Key: "$project", Value: bson.M{
+				"_id":     0,
+				"income":  1,
+				"expense": 1,
+			}},
+		},
+	}
+
+	cursor, err := r.Collection.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var result []models.PeriodSummary
+
+	if err := cursor.All(ctx, &result); err != nil {
+		return nil, err
+	}
+
+	if len(result) == 0 {
+		return &models.PeriodSummary{}, nil
+	}
+
+	return &result[0], nil
+}

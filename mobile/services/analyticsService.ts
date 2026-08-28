@@ -11,6 +11,11 @@ export interface MonthlySummary {
   expense: number;
 }
 
+export interface PeriodSummary {
+  income: number;
+  expense: number;
+}
+
 class AnalyticsService {
   async getCategorySummary(
   period: "W" | "M" | "Y"
@@ -28,6 +33,17 @@ class AnalyticsService {
     method: "GET",
   });
 }
+
+async getPeriodSummary(
+    period: "W" | "M" | "Y"
+  ): Promise<PeriodSummary> {
+    return await apiRequest(
+      `/analytics/summary?period=${period}`,
+      {
+        method: "GET",
+      }
+    );
+  }
 }
 
 export default new AnalyticsService();
