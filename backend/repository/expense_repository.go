@@ -198,7 +198,23 @@ func (r *ExpenseRepository) GetMonthlySummary(userID primitive.ObjectID) ([]mode
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	cursor, err := r.Collection.Find(ctx, bson.M{"user_id": userID})
+	now := time.Now()
+
+	startDate := time.Date(
+		now.Year(),
+		time.January,
+		1,
+		0, 0, 0, 0,
+		now.Location(),
+	)
+	endDate := startDate.AddDate(1, 0, 0)
+	cursor, err := r.Collection.Find(ctx, bson.M{
+		"user_id": userID,
+		"date": bson.M{
+			"$gte": startDate,
+			"$lt":  endDate,
+		},
+	})
 	if err != nil {
 		return nil, err
 	}
