@@ -5,8 +5,11 @@ import (
 	"log"
 	"net/http"
 
+	"expense-tracker-backend/middleware"
 	"expense-tracker-backend/models"
 	"expense-tracker-backend/services"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type UserHandler struct {
@@ -81,4 +84,79 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 	json.NewEncoder(w).Encode(response)
 
+}
+
+func (h *UserHandler) GetMonthlyLimit(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	userID, ok := r.Context().Value(middleware.UserIDKey).(string)
+
+	if !ok || userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	userObjectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusUnauthorized)
+		return
+	}
+
+	monthlyLimit, err := h.service.GetMonthlyLimit(userObjectID)
+	if err != nil {
+		http.Error(w, "Failed to get monthly limit", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	json.NewEncoder(w).Encode(map[string]float64{
+		"monthlyLimit": monthlyLimit,
+	})
+}
+
+func (h *UserHandler) UpdateMonthlyLimit(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	userID, ok := r.Context().Value(middleware.UserIDKey).(string)
+
+	if !ok || userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	userObjectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusUnauthorized)
+		return
+	}
+
+	var req struct {
+		MonthlyLimit float64 `json:"monthlyLimit"`
+	}
+
+	err = json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	err = h.service.UpdateMonthlyLimit(
+		userObjectID,
+		req.MonthlyLimit,
+	)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"message":      "Monthly limit updated successfully",
+		"monthlyLimit": req.MonthlyLimit,
+	})
 }

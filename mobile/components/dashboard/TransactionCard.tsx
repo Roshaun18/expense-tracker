@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, Pressable } from "react-native";
 
 import TransactionItem from "./TransactionItem";
-
+import { useRouter } from "expo-router";
 import {
   colors,
   spacing,
@@ -23,6 +23,7 @@ export default function TransactionCard({
   loading,
   error,
 }: TransactionCardProps) {
+  const router = useRouter();
   return (
     <View style={styles.card}>
       <View style={styles.header}>
@@ -30,7 +31,7 @@ export default function TransactionCard({
           Recent Transactions
         </Text>
 
-        <Pressable>
+        <Pressable onPress={()=>router.push("/history")}>
           <Text style={styles.viewAll}>
             View All
           </Text>

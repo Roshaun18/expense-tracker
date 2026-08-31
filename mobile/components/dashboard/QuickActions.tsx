@@ -21,13 +21,13 @@ export default function QuickActions() {
       <ActionButton
         title="History"
         icon="list"
-        onPress={() => console.log("History")}
+        onPress={() => router.push("/history")}
       />
 
       <ActionButton
         title="Analytics"
         icon="pie-chart"
-        onPress={() => console.log("Analytics")}
+        onPress={() => router.push("/analytics")}
       />
     </View>
   );

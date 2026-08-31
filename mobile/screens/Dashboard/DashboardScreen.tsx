@@ -10,6 +10,7 @@ import TipCard from "../../components/dashboard/TipCard";
 import TransactionCard from "../../components/dashboard/TransactionCard";
 import useDashboard from "../../hooks/useDashboard";
 import useRecentExpenses from "../../hooks/useRecentExpenses";
+import useMonthlyLimit from "../../hooks/useMonthlyLimit";
 
 export default function DashboardScreen() {
   const {summary, loading, error}= useDashboard();
@@ -18,6 +19,11 @@ export default function DashboardScreen() {
   loading: transactionsLoading,
   error: transactionsError,
 } = useRecentExpenses();
+const {
+  monthlyLimit,
+  loading: limitLoading,
+  error: limitError,
+} = useMonthlyLimit();
 
   if (loading) {
     return (
@@ -58,7 +64,7 @@ export default function DashboardScreen() {
 
       <MonthlySpendingCard
   spent={summary?.totalExpense ?? 0}
-  budget={2000}
+  budget={monthlyLimit}
 />
 
 <TipCard />

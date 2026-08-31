@@ -96,3 +96,22 @@ func (s *UserService) Login(req models.LoginRequest) (*models.User, string, erro
 	}
 	return user, token, nil
 }
+
+func (s *UserService) GetMonthlyLimit(
+	userID primitive.ObjectID,
+) (float64, error) {
+
+	return s.repo.GetMonthlyLimit(userID)
+}
+
+func (s *UserService) UpdateMonthlyLimit(
+	userID primitive.ObjectID,
+	monthlyLimit float64,
+) error {
+
+	if monthlyLimit <= 0 {
+		return errors.New("monthly limit must be greater than 0")
+	}
+
+	return s.repo.UpdateMonthlyLimit(userID, monthlyLimit)
+}

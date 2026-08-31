@@ -6,6 +6,8 @@ import ProfileMenu from "../../components/profile/ProfileMenu";
 
 import { spacing } from "../../theme";
 
+import MonthlyLimitCard from "../../components/profile/MonthlyLimitCard";
+
 export default function ProfileScreen() {
   return (
     <ScreenBackground>
@@ -14,6 +16,7 @@ export default function ProfileScreen() {
         contentContainerStyle={styles.container}
       >
         <ProfileHeader />
+        <MonthlyLimitCard />
 
         <ProfileMenu />
       </ScrollView>
