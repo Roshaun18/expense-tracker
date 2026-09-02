@@ -1,40 +1,83 @@
-import { View, Text, StyleSheet } from "react-native";
+import { useEffect, useState } from "react";
+import { View, Text, StyleSheet, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
+import { useRouter } from "expo-router";
 import { colors, spacing, typography } from "../../theme";
+
+import useProfile from "../../hooks/useProfile";
 
 type HeaderProps = {
   name?: string;
 };
 
-export default function Header({
-  name = "Roshaun",
-}: HeaderProps) {
+function getGreeting() {
+  const hour = new Date().getHours();
+
+  if (hour >= 5 && hour < 12) {
+    return "Good Morning 👋";
+  }
+
+  if (hour >= 12 && hour < 17) {
+    return "Good Afternoon 👋";
+  }
+
+  if (hour >= 17 && hour < 21) {
+    return "Good Evening 👋";
+  }
+
+  return "Good Night 👋";
+}
+
+export default function Header({name}: HeaderProps) {
+  const { profile } = useProfile();
+
+  const userName = name || profile?.name || "User";
+
+  const [greeting, setGreeting] = useState(getGreeting());
+
+  const router = useRouter();
+  useEffect(() => {
+    const updateGreeting = () => {
+      setGreeting(getGreeting());
+    };
+
+    updateGreeting();
+
+    const interval = setInterval(updateGreeting, 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <View style={styles.container}>
       <View>
         <Text style={styles.greeting}>
-          Good Morning 👋
+          {greeting}
         </Text>
 
         <Text style={styles.name}>
-          {name}
+          {userName}
         </Text>
       </View>
 
       <View style={styles.rightSection}>
         <View style={styles.iconContainer}>
-          <Ionicons
+          
+            <Ionicons
             name="notifications-outline"
             size={22}
             color={colors.textPrimary}
           />
+          
+          
         </View>
 
         <View style={styles.avatar}>
+          <Pressable onPress={()=>router.push("/(tabs)/profile")}>
           <Text style={styles.avatarText}>
-            {name.charAt(0)}
+            {userName.charAt(0)}
           </Text>
+          </Pressable>
         </View>
       </View>
     </View>

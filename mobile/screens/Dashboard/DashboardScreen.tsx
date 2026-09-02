@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Header from "../../components/dashboard/Header";
 import BalanceCard from "../../components/dashboard/BalanceCard";
 import ScreenBackground from "../../components/common/ScreenBackground";
@@ -14,6 +15,7 @@ import useMonthlyLimit from "../../hooks/useMonthlyLimit";
 
 export default function DashboardScreen() {
   const {summary, loading, error}= useDashboard();
+  const [balanceHidden, setBalanceHidden] = useState(false);
   const {
   expenses,
   loading: transactionsLoading,
@@ -58,7 +60,10 @@ const {
         income={summary?.totalIncome ?? 0}
         expense={summary?.totalExpense ?? 0}
         savings={(summary?.totalIncome ?? 0) - (summary?.totalExpense ?? 0)} 
-        hidden={false}
+        hidden={balanceHidden}
+  onToggleVisibility={() =>
+    setBalanceHidden((previous) => !previous)
+  }
       />
       <QuickActions />
 

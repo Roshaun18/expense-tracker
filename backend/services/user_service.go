@@ -42,6 +42,15 @@ func (s *UserService) Register(req models.RegisterRequest) (*models.User, error)
 	if len(req.Password) < 8 {
 		return nil, errors.New("password must be at least 8 characters")
 	}
+	allowedCurrencies := map[string]bool{
+		"INR": true,
+		"USD": true,
+		"EUR": true,
+		"GBP": true,
+	}
+	if !allowedCurrencies[req.Currency] {
+		return nil, errors.New("invalid currency")
+	}
 
 	existingUser, err := s.repo.FindByEmail(req.Email)
 
@@ -60,12 +69,15 @@ func (s *UserService) Register(req models.RegisterRequest) (*models.User, error)
 	now := time.Now()
 
 	user := &models.User{
-		ID:        primitive.NewObjectID(),
-		Name:      req.Name,
-		Email:     req.Email,
-		Password:  string(hashedPassword),
-		CreatedAt: now,
-		UpdatedAt: now,
+		ID:             primitive.NewObjectID(),
+		Name:           req.Name,
+		Email:          req.Email,
+		Password:       string(hashedPassword),
+		Currency:       req.Currency,
+		DailyReminders: true,
+		BudgetAlerts:   true,
+		CreatedAt:      now,
+		UpdatedAt:      now,
 	}
 
 	err = s.repo.CreateUser(user)
@@ -97,21 +109,39 @@ func (s *UserService) Login(req models.LoginRequest) (*models.User, string, erro
 	return user, token, nil
 }
 
-func (s *UserService) GetMonthlyLimit(
-	userID primitive.ObjectID,
-) (float64, error) {
-
+func (s *UserService) GetMonthlyLimit(userID primitive.ObjectID) (float64, error) {
 	return s.repo.GetMonthlyLimit(userID)
 }
 
-func (s *UserService) UpdateMonthlyLimit(
-	userID primitive.ObjectID,
-	monthlyLimit float64,
-) error {
-
+func (s *UserService) UpdateMonthlyLimit(userID primitive.ObjectID, monthlyLimit float64) error {
 	if monthlyLimit <= 0 {
 		return errors.New("monthly limit must be greater than 0")
 	}
-
 	return s.repo.UpdateMonthlyLimit(userID, monthlyLimit)
+}
+
+func (s *UserService) GetProfile(userID primitive.ObjectID) (*models.User, error) {
+	return s.repo.GetByID(userID)
+}
+
+func (s *UserService) UpdateProfile(userID primitive.ObjectID, req models.UpdateProfileRequest) error {
+	req.Name = strings.TrimSpace(req.Name)
+	if req.Name == "" {
+		return errors.New("Name is required")
+	}
+	return s.repo.UpdateName(userID, req.Name)
+}
+
+func (s *UserService) UpdateSettings(userID primitive.ObjectID, req models.UpdateSettingsRequest) error {
+	allowedCurrencies := map[string]bool{
+		"INR": true,
+		"USD": true,
+		"EUR": true,
+		"GBP": true,
+	}
+	if !allowedCurrencies[req.Currency] {
+		return errors.New("invalid currency")
+	}
+
+	return s.repo.UpdateSettings(userID, req.Currency, req.DailyReminders, req.BudgetAlerts)
 }

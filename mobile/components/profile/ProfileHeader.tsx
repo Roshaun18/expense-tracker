@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
+import { router } from "expo-router";
 import {
   colors,
   spacing,
@@ -8,7 +8,14 @@ import {
   radius,
 } from "../../theme";
 
-export default function ProfileHeader() {
+type Props = {
+  name: string;
+  email: string;
+};
+
+export default function ProfileHeader({
+  name, email,
+}: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.avatar}>
@@ -16,15 +23,16 @@ export default function ProfileHeader() {
           name="person"
           size={48}
           color={colors.textPrimary}
+          onPress={()=>router.push("/settings")}
         />
       </View>
 
       <Text style={styles.name}>
-        Roshaun N.U.
+        {name}
       </Text>
 
       <Text style={styles.email}>
-        roshaun@example.com
+        {email}
       </Text>
     </View>
   );

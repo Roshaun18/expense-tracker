@@ -32,7 +32,7 @@ export default function BalanceCard({
       <View style={styles.header}>
         <Text style={styles.label}>CURRENT BALANCE</Text>
 
-        <Pressable onPress={onToggleVisibility}>
+        <Pressable onPress={onToggleVisibility} hitSlop={10}>
           <Ionicons
             name={hidden ? "eye-off-outline" : "eye-outline"}
             size={20}

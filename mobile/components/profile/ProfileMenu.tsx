@@ -1,47 +1,36 @@
 import ProfileMenuItem from "./ProfileMenuItem";
-
+import { useRouter } from "expo-router";
+import { View, StyleSheet } from "react-native";
+import authService from "../../services/authService";
 import {
   colors,
+  spacing
 } from "../../theme";
 
 export default function ProfileMenu() {
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await authService.logout();
+
+    router.replace("/login");
+  };
+
   return (
-    <>
+    <View>
       <ProfileMenuItem
-        title="Edit Profile"
-        icon="person-outline"
+        title="Settings"
+        icon="settings"
         iconColor={colors.primary}
-      />
-
-      <ProfileMenuItem
-        title="Notifications"
-        icon="notifications-outline"
-        iconColor={colors.electric}
-      />
-
-      <ProfileMenuItem
-        title="Privacy"
-        icon="lock-closed-outline"
-        iconColor={colors.violet}
-      />
-
-      <ProfileMenuItem
-        title="Appearance"
-        icon="moon-outline"
-        iconColor={colors.primary}
-      />
-
-      <ProfileMenuItem
-        title="Help & Support"
-        icon="help-circle-outline"
-        iconColor={colors.income}
+        onPress={()=>router.push("/settings")}
       />
 
       <ProfileMenuItem
         title="Logout"
         icon="log-out-outline"
         iconColor={colors.expense}
+        onPress={handleLogout}
       />
-    </>
+    </View>
   );
 }

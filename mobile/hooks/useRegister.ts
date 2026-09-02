@@ -25,7 +25,6 @@ export default function useRegister() {
     password: "",
     confirmPassword: "",
     currency: "INR",
-    interests: [],
   });
 
   const [errors, setErrors] = useState<RegisterErrors>({
@@ -88,6 +87,7 @@ export default function useRegister() {
         name: form.fullName,
         email: form.email,
         password: form.password,
+        currency: form.currency,
       });
 
       console.log("Registration successful:", response);

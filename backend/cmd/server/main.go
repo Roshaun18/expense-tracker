@@ -28,6 +28,9 @@ func main() {
 	router.HandleFunc("/auth/login", userHandler.Login).Methods("POST")
 	router.Handle("/user/monthly-limit", middleware.AuthMiddleware(http.HandlerFunc(userHandler.GetMonthlyLimit))).Methods("GET")
 	router.Handle("/user/monthly-limit", middleware.AuthMiddleware(http.HandlerFunc(userHandler.UpdateMonthlyLimit))).Methods("PUT")
+	router.Handle("/user/profile", middleware.AuthMiddleware(http.HandlerFunc(userHandler.GetProfile))).Methods("GET")
+	router.Handle("/user/profile", middleware.AuthMiddleware(http.HandlerFunc(userHandler.UpdateProfile))).Methods("PUT")
+	router.Handle("/user/settings", middleware.AuthMiddleware(http.HandlerFunc(userHandler.UpdateSettings))).Methods("PUT")
 
 	router.Handle("/expenses/recent", middleware.AuthMiddleware(http.HandlerFunc(expenseHandler.GetRecentExpenses))).Methods("GET")
 	router.Handle("/expenses", middleware.AuthMiddleware(http.HandlerFunc(expenseHandler.CreateExpense))).Methods("POST")

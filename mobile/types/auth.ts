@@ -5,7 +5,6 @@ export interface RegisterForm {
   password: string;
   confirmPassword: string;
   currency: string;
-  interests: string[];
 }
 
 export interface RegisterErrors {

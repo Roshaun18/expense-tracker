@@ -18,6 +18,7 @@ class AuthService {
     name: string;
     email: string;
     password: string;
+    currency: string;
   }) {
     return await apiRequest("/auth/register", {
       method: "POST",

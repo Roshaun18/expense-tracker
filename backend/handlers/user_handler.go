@@ -160,3 +160,102 @@ func (h *UserHandler) UpdateMonthlyLimit(
 		"monthlyLimit": req.MonthlyLimit,
 	})
 }
+
+func (h *UserHandler) GetProfile(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	userID, ok := r.Context().Value(middleware.UserIDKey).(string)
+
+	if !ok || userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	userObjectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusUnauthorized)
+		return
+	}
+
+	user, err := h.service.GetProfile(userObjectID)
+	if err != nil {
+		http.Error(
+			w,
+			"Failed to get profile",
+			http.StatusInternalServerError,
+		)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(user)
+}
+
+func (h *UserHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(middleware.UserIDKey).(string)
+	if !ok || userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+	userObjectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		http.Error(w, "Invalide user ID", http.StatusUnauthorized)
+		return
+	}
+
+	var req models.UpdateProfileRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	if err := h.service.UpdateProfile(userObjectID, req); err != nil {
+		if err.Error() == "Name is required" {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		http.Error(w, "Failed to update profile", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "Profile updated successfully",
+	})
+}
+
+func (h *UserHandler) UpdateSettings(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(middleware.UserIDKey).(string)
+	if !ok || userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	userObjectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusUnauthorized)
+		return
+	}
+
+	var req models.UpdateSettingsRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	if err := h.service.UpdateSettings(userObjectID, req); err != nil {
+		if err.Error() == "invalid currency" {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		log.Println("Update settings error:", err)
+		http.Error(w, "Failed to update settings", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"message": "Settings update successfully",
+	})
+}

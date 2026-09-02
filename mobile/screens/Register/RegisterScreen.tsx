@@ -181,51 +181,6 @@ export default function RegisterScreen() {
                 )}
               </View>
 
-              <Text style={styles.sectionTitle}>
-                Interests
-              </Text>
-
-              <View style={styles.chipContainer}>
-                {[
-                  "Budgeting",
-                  "Saving",
-                  "Investing",
-                  "Travel",
-                  "Crypto",
-                  "Business",
-                ].map((interest) => (
-                  <Chip
-                    key={interest}
-                    title={interest}
-                    selected={form.interests.includes(
-                      interest
-                    )}
-                    onPress={() => {
-                      if (
-                        form.interests.includes(
-                          interest
-                        )
-                      ) {
-                        updateField(
-                          "interests",
-                          form.interests.filter(
-                            (i) => i !== interest
-                          )
-                        );
-                      } else {
-                        updateField(
-                          "interests",
-                          [
-                            ...form.interests,
-                            interest,
-                          ]
-                        );
-                      }
-                    }}
-                  />
-                ))}
-              </View>
-
               <View style={styles.buttonRow}>
                 <PrimaryButton
                   title="Back"
