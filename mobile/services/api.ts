@@ -1,5 +1,5 @@
 import * as SecureStore from "expo-secure-store";
-const API_URL="http://192.168.1.46:8080";
+const API_URL="https://expense-tracker-1-dcwp.onrender.com";
 
 export async function apiRequest(
     endpoint: string,
