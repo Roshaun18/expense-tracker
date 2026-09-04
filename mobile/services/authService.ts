@@ -10,6 +10,7 @@ class AuthService {
     });
 
     await SecureStore.setItemAsync("token", response.token);
+    await SecureStore.setItemAsync("userId", response.user.id);
 
     return response;
   }
@@ -28,6 +29,7 @@ class AuthService {
 
   async logout() {
     await SecureStore.deleteItemAsync("token");
+    await SecureStore.deleteItemAsync("userId");
   }
 }
 

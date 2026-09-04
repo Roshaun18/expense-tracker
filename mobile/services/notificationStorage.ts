@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import * as SecureStore from "expo-secure-store";
 export interface AppNotification {
   id: string;
   title: string;
@@ -8,12 +8,21 @@ export interface AppNotification {
   createdAt: string;
 }
 
-const NOTIFICATION_KEY = "@expense_tracker_notifications";
+const getNotificationKey = async () => {
+  const userId = await SecureStore.getItemAsync("userId");
+
+  if (!userId) {
+    throw new Error("User ID not found");
+  }
+
+  return `@expense_tracker_notifications_${userId}`;
+};
 
 class NotificationStorage {
   async getNotifications(): Promise<AppNotification[]> {
     try {
-      const stored = await AsyncStorage.getItem(NOTIFICATION_KEY);
+      const key = await getNotificationKey();
+      const stored = await AsyncStorage.getItem(key);
 
       if (!stored) {
         return [];
@@ -34,12 +43,13 @@ class NotificationStorage {
     notification: AppNotification
   ): Promise<void> {
     try {
+      const key = await getNotificationKey();
       const notifications = await this.getNotifications();
 
       notifications.unshift(notification);
 
       await AsyncStorage.setItem(
-        NOTIFICATION_KEY,
+        key,
         JSON.stringify(notifications)
       );
     } catch (error) {
@@ -52,7 +62,8 @@ class NotificationStorage {
 
   async clearNotifications(): Promise<void> {
     try {
-      await AsyncStorage.removeItem(NOTIFICATION_KEY);
+      const key = await getNotificationKey();
+      await AsyncStorage.removeItem(key);
     } catch (error) {
       console.error(
         "Failed to clear notifications:",
