@@ -11,28 +11,32 @@ import (
 )
 
 type ExpenseService struct {
-	repo *repository.ExpenseRepository
+	repo            *repository.ExpenseRepository
+	userRepo        *repository.UserRepository
+	budgetAlertRepo *repository.BudgetAlertRepository
 }
 
 func NewExpenseService() *ExpenseService {
 	return &ExpenseService{
-		repo: repository.NewExpenseRepository(),
+		repo:            repository.NewExpenseRepository(),
+		userRepo:        repository.NewUserRepository(),
+		budgetAlertRepo: repository.NewBudgetAlertRepository(),
 	}
 }
 
-func (s *ExpenseService) CreateExpense(expense *models.Expense) error {
+func (s *ExpenseService) CreateExpense(expense *models.Expense) (*models.BudgetAlert, error) {
 	//Validation
 	if expense.Title == "" {
-		return errors.New("title is required")
+		return nil, errors.New("title is required")
 	}
 	if expense.Amount <= 0 {
-		return errors.New("amount must be greater than zero")
+		return nil, errors.New("amount must be greater than zero")
 	}
 	if expense.Category == "" {
-		return errors.New("category is required")
+		return nil, errors.New("category is required")
 	}
 	if expense.Type != "income" && expense.Type != "expense" {
-		return errors.New("invalid transaction type")
+		return nil, errors.New("invalid transaction type")
 	}
 
 	now := time.Now()
@@ -44,8 +48,72 @@ func (s *ExpenseService) CreateExpense(expense *models.Expense) error {
 	if expense.Date.IsZero() {
 		expense.Date = now
 	}
+	if err := s.repo.CreateExpense(expense); err != nil {
+		return nil, err
+	}
 
-	return s.repo.CreateExpense(expense)
+	if expense.Type != "expense" {
+		return &models.BudgetAlert{
+			Triggered: false,
+		}, nil
+	}
+
+	spent, err := s.repo.GetCurrentMonthExpense(expense.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	budgetSettings, err := s.userRepo.GetBudgetSettings(expense.UserID)
+	if err != nil {
+		return nil, err
+	}
+	if !budgetSettings.BudgetAlerts {
+		return &models.BudgetAlert{
+			Triggered: false,
+		}, nil
+	}
+
+	if budgetSettings.MonthlyLimit <= 0 {
+		return &models.BudgetAlert{
+			Triggered: false,
+		}, nil
+	}
+
+	percentage := (spent / budgetSettings.MonthlyLimit) * 100
+
+	alertState, err := s.budgetAlertRepo.GetCurrentMonthAlertState(expense.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	alert := &models.BudgetAlert{
+		Triggered:    false,
+		Percentage:   percentage,
+		Spent:        spent,
+		MonthlyLimit: budgetSettings.MonthlyLimit,
+	}
+
+	if percentage >= 100 {
+		if alertState == nil || !alertState.ExceededSent {
+			alert.Triggered = true
+			alert.Level = "exceeded"
+
+			if err := s.budgetAlertRepo.MarkExceededSent(expense.UserID); err != nil {
+				return nil, err
+			}
+		}
+	} else if percentage >= 80 {
+		if alertState == nil || !alertState.WarningSent {
+			alert.Triggered = true
+			alert.Level = "warning"
+
+			if err := s.budgetAlertRepo.MarkWarningSent(expense.UserID); err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	return alert, nil
 }
 
 func (s *ExpenseService) GetExpenses(userID primitive.ObjectID) ([]models.Expense, error) {

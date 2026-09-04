@@ -14,6 +14,7 @@ import SaveButton from "../../components/transaction/SaveButton";
 import ScreenHeader from "../../components/common/ScreenHeader";
 import TextField from "../../components/common/TextField";
 import expenseService from "../../services/expenseService";
+import notificationService from "../../services/notificationService";
 import { router } from "expo-router";
 
 type AddTransactionScreenProps = {
@@ -65,14 +66,27 @@ const categories =
       setLoading(true);
       setError("");
 
-      await expenseService.createExpense({
-        title: title.trim(),
-        amount: numericAmount,
-        category: selectedCategory,
-        type,
-        note: notes.trim(),
-        date: date.toISOString(),
-      });
+      const response = await expenseService.createExpense({
+      title: title.trim(),
+      amount: numericAmount,
+      category: selectedCategory,
+      type,
+      note: notes.trim(),
+      date: date.toISOString(),
+    });
+
+    if (
+      type === "expense" &&
+      response.budgetAlert?.triggered &&
+      response.budgetAlert.level
+    ) {
+      await notificationService.sendBudgetAlert(
+        response.budgetAlert.spent ?? 0,
+        response.budgetAlert.monthlyLimit ?? 0,
+        "₹",
+        response.budgetAlert.level
+      );
+    }
 
       console.log(
         "Transaction created successfully"

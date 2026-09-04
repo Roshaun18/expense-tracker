@@ -57,7 +57,7 @@ func (h *ExpenseHandler) CreateExpense(w http.ResponseWriter, r *http.Request) {
 	}
 	expense.UserID = objectID
 
-	err = h.service.CreateExpense(&expense)
+	budgetAlert, err := h.service.CreateExpense(&expense)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -68,8 +68,9 @@ func (h *ExpenseHandler) CreateExpense(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 
 	json.NewEncoder(w).Encode(map[string]any{
-		"message": "Expense created successfully",
-		"data":    expense,
+		"message":     "Expense created successfully",
+		"data":        expense,
+		"budgetAlert": budgetAlert,
 	})
 }
 

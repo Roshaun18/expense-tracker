@@ -22,6 +22,20 @@ export interface CreateExpenseRequest {
   date: string;
 }
 
+export interface BudgetAlert {
+  triggered: boolean;
+  level?: "warning" | "exceeded";
+  percentage?: number;
+  spent?: number;
+  monthlyLimit?: number;
+}
+
+export interface CreateExpenseResponse {
+  message: string;
+  data: Expense;
+  budgetAlert: BudgetAlert;
+}
+
 class ExpenseService {
   async getRecentExpenses(): Promise<Expense[]> {
     return await apiRequest("/expenses/recent", {
@@ -36,7 +50,7 @@ class ExpenseService {
 
   async createExpense(
     data: CreateExpenseRequest
-  ): Promise<Expense> {
+  ): Promise<CreateExpenseResponse> {
     return await apiRequest("/expenses", {
       method: "POST",
       body: JSON.stringify(data),

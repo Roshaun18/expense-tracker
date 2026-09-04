@@ -18,6 +18,9 @@ func main() {
 		log.Fatal(err)
 	}
 	config.ConnectDB(os.Getenv("MONGODB_URI"), os.Getenv("DB_NAME"))
+	if err := config.CreatebudgetAlertIndexes(); err != nil {
+		log.Fatal(err)
+	}
 
 	router := mux.NewRouter()
 

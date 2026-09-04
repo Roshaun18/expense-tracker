@@ -1,13 +1,17 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import { colors, spacing, typography } from "../../theme";
 
 import useProfile from "../../hooks/useProfile";
-
+import notificationStorage, {
+  AppNotification,
+} from "../../services/notificationStorage";
 type HeaderProps = {
   name?: string;
+  notificationCount: number;
+  onNotificationPress: () => void;
 };
 
 function getGreeting() {
@@ -28,12 +32,17 @@ function getGreeting() {
   return "Good Night 👋";
 }
 
-export default function Header({name}: HeaderProps) {
+export default function Header({
+  name,
+  notificationCount,
+  onNotificationPress,
+}: HeaderProps) {
   const { profile } = useProfile();
 
   const userName = name || profile?.name || "User";
 
   const [greeting, setGreeting] = useState(getGreeting());
+
 
   const router = useRouter();
   useEffect(() => {
@@ -47,6 +56,8 @@ export default function Header({name}: HeaderProps) {
 
     return () => clearInterval(interval);
   }, []);
+
+  
 
   return (
     <View style={styles.container}>
@@ -62,15 +73,24 @@ export default function Header({name}: HeaderProps) {
 
       <View style={styles.rightSection}>
         <View style={styles.iconContainer}>
-          
-            <Ionicons
-            name="notifications-outline"
-            size={22}
-            color={colors.textPrimary}
-          />
-          
-          
-        </View>
+  <Pressable onPress={onNotificationPress}>
+    <Ionicons
+      name="notifications-outline"
+      size={22}
+      color={colors.textPrimary}
+    />
+
+    {notificationCount > 0 && (
+      <View style={styles.badge}>
+        <Text style={styles.badgeText}>
+          {notificationCount > 9
+            ? "9+"
+            : notificationCount}
+        </Text>
+      </View>
+    )}
+  </Pressable>
+</View>
 
         <View style={styles.avatar}>
           <Pressable onPress={()=>router.push("/(tabs)/profile")}>
@@ -132,4 +152,23 @@ const styles = StyleSheet.create({
     fontSize: typography.size.md,
     fontWeight: typography.weight.bold,
   },
+
+  badge: {
+  position: "absolute",
+  top: -6,
+  right: -8,
+  minWidth: 16,
+  height: 16,
+  borderRadius: 8,
+  backgroundColor: colors.danger,
+  justifyContent: "center",
+  alignItems: "center",
+  paddingHorizontal: 3,
+},
+
+badgeText: {
+  color: colors.background,
+  fontSize: 9,
+  fontWeight: "bold",
+},
 });

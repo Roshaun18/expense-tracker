@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import GlassCard from "../../components/common/GlassCard";
 import ScreenBackground from "../../components/common/ScreenBackground";

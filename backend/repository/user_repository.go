@@ -15,6 +15,11 @@ type UserRepository struct {
 	Collection *mongo.Collection
 }
 
+type BudgetSettings struct {
+	MonthlyLimit float64 `bson:"monthly_limit"`
+	BudgetAlerts bool    `bson:"budget_alerts"`
+}
+
 func NewUserRepository() *UserRepository {
 	return &UserRepository{
 		Collection: config.DB.Collection("users"),
@@ -167,4 +172,21 @@ func (r *UserRepository) UpdateSettings(userID primitive.ObjectID, currency stri
 		return mongo.ErrNoDocuments
 	}
 	return nil
+}
+
+func (r *UserRepository) GetBudgetSettings(userID primitive.ObjectID) (*BudgetSettings, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	var settings BudgetSettings
+
+	err := r.Collection.FindOne(
+		ctx,
+		bson.M{"_id": userID},
+	).Decode(&settings)
+
+	if err != nil {
+		return nil, err
+	}
+	return &settings, nil
 }

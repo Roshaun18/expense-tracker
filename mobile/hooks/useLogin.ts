@@ -55,6 +55,18 @@ export default function useLogin() {
       router.replace("/(tabs)");
     } catch (error) {
       console.error("Login error:",error);
+      if (error instanceof Error) {
+    setErrors({
+      email: error.message,
+      password: "",
+    });
+  } else {
+    setErrors({
+      email: "Invalid email or password",
+      password: "",
+    });
+  }
+
     } finally {
       setLoading(false);
     }

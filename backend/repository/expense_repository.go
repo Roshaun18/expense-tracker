@@ -338,3 +338,58 @@ func (r *ExpenseRepository) GetPeriodSummary(userID primitive.ObjectID, startDat
 
 	return &result[0], nil
 }
+
+func (r *ExpenseRepository) GetCurrentMonthExpense(userID primitive.ObjectID) (float64, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	now := time.Now()
+
+	startDate := time.Date(
+		now.Year(),
+		now.Month(),
+		1,
+		0, 0, 0, 0,
+		now.Location(),
+	)
+	endDate := startDate.AddDate(0, 1, 0)
+
+	pipeline := mongo.Pipeline{
+		bson.D{
+			{Key: "$match", Value: bson.M{
+				"user_id": userID,
+				"type":    "expense",
+				"date": bson.M{
+					"$gte": startDate,
+					"$lt":  endDate,
+				},
+			}},
+		},
+		bson.D{
+			{Key: "$group", Value: bson.M{
+				"_id":   nil,
+				"total": bson.M{"$sum": "$amount"},
+			}},
+		},
+	}
+	cursor, err := r.Collection.Aggregate(ctx, pipeline)
+	if err != nil {
+		return 0, err
+	}
+	defer cursor.Close(ctx)
+
+	var result struct {
+		Total float64 `bson:"total"`
+	}
+
+	if cursor.Next(ctx) {
+		if err := cursor.Decode(&result); err != nil {
+			return 0, err
+		}
+		return result.Total, nil
+	}
+	if err := cursor.Err(); err != nil {
+		return 0, err
+	}
+	return 0, nil
+}
