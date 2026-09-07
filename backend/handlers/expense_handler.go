@@ -431,3 +431,34 @@ func (h *ExpenseHandler) GetPeriodSummary(w http.ResponseWriter, r *http.Request
 	json.NewEncoder(w).Encode(result)
 
 }
+
+func (h *ExpenseHandler) HasTodayExpense(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	userID, ok := r.Context().Value(middleware.UserIDKey).(string)
+	if !ok || userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	objectID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		http.Error(w, "Invalid user ID", http.StatusUnauthorized)
+		return
+	}
+
+	hasExpense, err := h.service.HasTodayExpense(objectID)
+	if err != nil {
+		http.Error(w, "Failed to check today's expenses", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	json.NewEncoder(w).Encode(map[string]any{
+		"hasExpense": hasExpense,
+	})
+}

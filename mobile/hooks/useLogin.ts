@@ -6,6 +6,7 @@ import {
   validateLogin,
   hasLoginErrors,
 } from "../validators/loginValidator";
+import notificationService from "../services/notificationService";
 
 export default function useLogin() {
   const [form, setForm] = useState<LoginForm>({
@@ -49,7 +50,7 @@ export default function useLogin() {
       setLoading(true);
 
       const response = await authService.login(form);
-
+      await notificationService.registerPushToken();
       console.log("Login successful:",response);
 
       router.replace("/(tabs)");

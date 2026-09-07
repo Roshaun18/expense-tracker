@@ -393,3 +393,35 @@ func (r *ExpenseRepository) GetCurrentMonthExpense(userID primitive.ObjectID) (f
 	}
 	return 0, nil
 }
+
+func (r *ExpenseRepository) HasTodayExpense(userID primitive.ObjectID) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	now := time.Now()
+
+	startOfDay := time.Date(
+		now.Year(),
+		now.Month(),
+		now.Day(),
+		0, 0, 0, 0,
+		now.Location(),
+	)
+	endOfDay := startOfDay.AddDate(0, 0, 1)
+
+	filter := bson.M{
+		"user_id": userID,
+		"type":    "expense",
+		"date": bson.M{
+			"$gte": startOfDay,
+			"$lt":  endOfDay,
+		},
+	}
+
+	count, err := r.Collection.CountDocuments(ctx, filter)
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
+}

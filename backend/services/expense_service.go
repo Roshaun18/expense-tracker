@@ -151,3 +151,11 @@ func (s *ExpenseService) GetRecentExpenses(userID primitive.ObjectID) ([]models.
 func (s *ExpenseService) GetPeriodSummary(userID primitive.ObjectID, startDate time.Time, endDate time.Time) (*models.PeriodSummary, error) {
 	return s.repo.GetPeriodSummary(userID, startDate, endDate)
 }
+
+func (s *ExpenseService) HasTodayExpense(userID primitive.ObjectID) (bool, error) {
+	hasExpense, err := s.repo.HasTodayExpense(userID)
+	if err != nil {
+		return false, err
+	}
+	return hasExpense, nil
+}

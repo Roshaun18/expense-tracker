@@ -190,3 +190,21 @@ func (r *UserRepository) GetBudgetSettings(userID primitive.ObjectID) (*BudgetSe
 	}
 	return &settings, nil
 }
+
+func (r *UserRepository) UpdatePushToken(userID primitive.ObjectID, pushToken string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	_, err := r.Collection.UpdateOne(ctx,
+		bson.M{
+			"_id": userID,
+		},
+		bson.M{
+			"$set": bson.M{
+				"push_token": pushToken,
+				"updated_at": time.Now(),
+			},
+		},
+	)
+	return err
+}

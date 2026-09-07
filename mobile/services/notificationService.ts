@@ -25,6 +25,23 @@ class NotificationService {
     return status === "granted";
   }
 
+  async registerPushToken(): Promise<string | null> {
+  const hasPermission = await this.requestPermission();
+
+  if (!hasPermission) {
+    console.log("Notification permission not granted");
+    return null;
+  }
+
+  const token = (
+    await Notifications.getExpoPushTokenAsync()
+  ).data;
+
+  console.log("Expo Push Token:", token);
+
+  return token;
+}
+
   async scheduleDailyReminder() {
     await Notifications.cancelAllScheduledNotificationsAsync();
 
@@ -40,6 +57,18 @@ class NotificationService {
         minute: 0,
       },
     });
+
+    await Notifications.scheduleNotificationAsync({
+    content: {
+      title: "Expense Check",
+      body: "You haven't recorded any expenses today.",
+    },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.DAILY,
+      hour: 21,
+      minute: 0,
+    },
+  });
   }
 
   async sendBudgetAlert(

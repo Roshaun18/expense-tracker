@@ -78,6 +78,15 @@ async deleteExpense(id: string): Promise<void> {
     method: "DELETE",
   });
 }
+
+async hasTodayExpense(): Promise<boolean> {
+  const response = await apiRequest("/expenses/today", {
+    method: "GET",
+  });
+
+  return response.hasExpense;
+}
+
 }
 
 export default new ExpenseService();

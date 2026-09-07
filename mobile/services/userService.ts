@@ -15,6 +15,15 @@ export interface UserProfile {
 }
 
 class UserService {
+  async updatePushToken(pushToken: string): Promise<void> {
+  await apiRequest("/user/push-token", {
+    method: "POST",
+    body: JSON.stringify({
+      pushToken,
+    }),
+  });
+}
+
   async getMonthlyLimit(): Promise<MonthlyLimitResponse> {
     return await apiRequest("/user/monthly-limit", {
       method: "GET",

@@ -145,3 +145,10 @@ func (s *UserService) UpdateSettings(userID primitive.ObjectID, req models.Updat
 
 	return s.repo.UpdateSettings(userID, req.Currency, req.DailyReminders, req.BudgetAlerts)
 }
+
+func (s *UserService) UpdatePushToken(userID primitive.ObjectID, pushToken string) error {
+	if pushToken == "" {
+		return errors.New("push token is required")
+	}
+	return s.repo.UpdatePushToken(userID, pushToken)
+}

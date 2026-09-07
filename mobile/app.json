@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Expense Tracker",
-    "slug": "roshaun",
+    "slug": "expensetracker",
     "scheme": "expensetracker",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -36,9 +36,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "a170ffe7-83ae-4f9b-b028-ab9eb9e6ed7e"
+        "projectId": "e6d43474-88bd-4b08-a905-cdcfa63c2d5c"
       }
     },
-    "owner": "roshauns-team"
+    "owner": "roshaun18"
   }
 }

@@ -33,6 +33,7 @@ func main() {
 	router.Handle("/user/profile", middleware.AuthMiddleware(http.HandlerFunc(userHandler.GetProfile))).Methods("GET")
 	router.Handle("/user/profile", middleware.AuthMiddleware(http.HandlerFunc(userHandler.UpdateProfile))).Methods("PUT")
 	router.Handle("/user/settings", middleware.AuthMiddleware(http.HandlerFunc(userHandler.UpdateSettings))).Methods("PUT")
+	router.Handle("/user/push-token", middleware.AuthMiddleware(http.HandlerFunc(userHandler.UpdatePushToken))).Methods("POST")
 
 	router.Handle("/expenses/recent", middleware.AuthMiddleware(http.HandlerFunc(expenseHandler.GetRecentExpenses))).Methods("GET")
 	router.Handle("/expenses", middleware.AuthMiddleware(http.HandlerFunc(expenseHandler.CreateExpense))).Methods("POST")
@@ -44,6 +45,7 @@ func main() {
 	router.Handle("/analytics/category", middleware.AuthMiddleware(http.HandlerFunc(expenseHandler.GetCategorySummary))).Methods(("GET"))
 	router.Handle("/analytics/monthly", middleware.AuthMiddleware(http.HandlerFunc(expenseHandler.GetMonthlySummary))).Methods("GET")
 	router.Handle("/analytics/summary", middleware.AuthMiddleware(http.HandlerFunc(expenseHandler.GetPeriodSummary))).Methods("GET")
+	router.Handle("/expenses/today", middleware.AuthMiddleware(http.HandlerFunc(expenseHandler.HasTodayExpense))).Methods("GET")
 
 	log.Println("Server running on :8080")
 

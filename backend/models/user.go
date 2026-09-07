@@ -15,6 +15,7 @@ type User struct {
 	Currency       string             `bson:"currency" json:"currency"`
 	DailyReminders bool               `bson:"daily_reminders" json:"dailyReminders"`
 	BudgetAlerts   bool               `bson:"budget_alerts" json:"budgetAlerts"`
+	PushToken      string             `bson:"push_token,omitempty" json:"-"`
 	CreatedAt      time.Time          `bson:"created_at" json:"createdAt"`
 	UpdatedAt      time.Time          `bson:"updated_at" json:"updatedAt"`
 }
