@@ -25,6 +25,7 @@ func main() {
 
 	expenseHandler := handlers.NewExpenseHandler()
 	userHandler := handlers.NewUserHandler()
+	dailyReminderHandler := handlers.NewDailyReminderHandler()
 
 	router.HandleFunc("/auth/register", userHandler.Register).Methods("POST")
 	router.HandleFunc("/auth/login", userHandler.Login).Methods("POST")
@@ -34,6 +35,8 @@ func main() {
 	router.Handle("/user/profile", middleware.AuthMiddleware(http.HandlerFunc(userHandler.UpdateProfile))).Methods("PUT")
 	router.Handle("/user/settings", middleware.AuthMiddleware(http.HandlerFunc(userHandler.UpdateSettings))).Methods("PUT")
 	router.Handle("/user/push-token", middleware.AuthMiddleware(http.HandlerFunc(userHandler.UpdatePushToken))).Methods("POST")
+
+	router.Handle("/internal/daily-reminder", http.HandlerFunc(dailyReminderHandler.SendDailyReminders)).Methods("POST")
 
 	router.Handle("/expenses/recent", middleware.AuthMiddleware(http.HandlerFunc(expenseHandler.GetRecentExpenses))).Methods("GET")
 	router.Handle("/expenses", middleware.AuthMiddleware(http.HandlerFunc(expenseHandler.CreateExpense))).Methods("POST")

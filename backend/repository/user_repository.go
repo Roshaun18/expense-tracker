@@ -208,3 +208,29 @@ func (r *UserRepository) UpdatePushToken(userID primitive.ObjectID, pushToken st
 	)
 	return err
 }
+
+func (r *UserRepository) GetDailyReminderUsers() ([]models.User, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	filter := bson.M{
+		"daily_remainders": true,
+		"push_token": bson.M{
+			"$ne": "",
+		},
+	}
+
+	cursor, err := r.Collection.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var users []models.User
+
+	if err := cursor.All(ctx, &users); err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
