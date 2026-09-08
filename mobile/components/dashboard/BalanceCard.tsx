@@ -49,10 +49,6 @@ export default function BalanceCard({
             })}`}
       </Text>
 
-      <Text style={styles.subtitle}>
-        Income minus expense
-      </Text>
-
       <View style={styles.cards}>
         <SpendingCard
           title="Income"
