@@ -112,7 +112,6 @@ useEffect(() => {
   budget={monthlyLimit}
 />
 
-<TipCard />
 <TransactionCard
   expenses={expenses}
   loading={transactionsLoading}
