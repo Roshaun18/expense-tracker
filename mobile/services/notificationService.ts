@@ -1,5 +1,6 @@
 import * as Notifications from "expo-notifications";
 import notificationStorage from "./notificationStorage";
+import userService from "./userService";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -38,6 +39,8 @@ class NotificationService {
   ).data;
 
   console.log("Expo Push Token:", token);
+  await userService.updatePushToken(token);
+
 
   return token;
 }
@@ -57,18 +60,6 @@ class NotificationService {
         minute: 0,
       },
     });
-
-    await Notifications.scheduleNotificationAsync({
-    content: {
-      title: "Expense Check",
-      body: "You haven't recorded any expenses today.",
-    },
-    trigger: {
-      type: Notifications.SchedulableTriggerInputTypes.DAILY,
-      hour: 21,
-      minute: 0,
-    },
-  });
   }
 
   async sendBudgetAlert(

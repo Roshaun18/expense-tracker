@@ -343,14 +343,18 @@ func (r *ExpenseRepository) GetCurrentMonthExpense(userID primitive.ObjectID) (f
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	now := time.Now()
+	location, err := time.LoadLocation("Asia/Kolkata")
+	if err != nil {
+		return 0, err
+	}
+	now := time.Now().In(location)
 
 	startDate := time.Date(
 		now.Year(),
 		now.Month(),
 		1,
 		0, 0, 0, 0,
-		now.Location(),
+		location,
 	)
 	endDate := startDate.AddDate(0, 1, 0)
 
@@ -398,14 +402,18 @@ func (r *ExpenseRepository) HasTodayExpense(userID primitive.ObjectID) (bool, er
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	now := time.Now()
+	location, err := time.LoadLocation("Asia/Kolkata")
+	if err != nil {
+		return false, err
+	}
+	now := time.Now().In(location)
 
 	startOfDay := time.Date(
 		now.Year(),
 		now.Month(),
 		now.Day(),
 		0, 0, 0, 0,
-		now.Location(),
+		location,
 	)
 	endOfDay := startOfDay.AddDate(0, 0, 1)
 

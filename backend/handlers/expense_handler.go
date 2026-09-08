@@ -267,7 +267,12 @@ func (h *ExpenseHandler) GetCategorySummary(w http.ResponseWriter, r *http.Reque
 		period = "M"
 	}
 
-	now := time.Now()
+	location, err := time.LoadLocation("Asia/Kolkata")
+	if err != nil {
+		http.Error(w, "Failed to load timezone", http.StatusInternalServerError)
+		return
+	}
+	now := time.Now().In(location)
 
 	var startDate time.Time
 	var endDate time.Time
@@ -277,20 +282,20 @@ func (h *ExpenseHandler) GetCategorySummary(w http.ResponseWriter, r *http.Reque
 		startDate = now.AddDate(0, 0, -int(now.Weekday()))
 		startDate = time.Date(startDate.Year(), startDate.Month(), startDate.Day(),
 			0, 0, 0, 0,
-			now.Location())
+			location)
 		endDate = startDate.AddDate(0, 0, 7)
 	case "M":
 		startDate = time.Date(now.Year(), now.Month(),
 			1,
 			0, 0, 0, 0,
-			now.Location())
+			location)
 		endDate = startDate.AddDate(0, 1, 0)
 	case "Y":
 		startDate = time.Date(now.Year(),
 			1,
 			1,
 			0, 0, 0, 0,
-			now.Location())
+			location)
 		endDate = startDate.AddDate(1, 0, 0)
 	default:
 		http.Error(w, "Invalid period", http.StatusBadRequest)
@@ -380,7 +385,12 @@ func (h *ExpenseHandler) GetPeriodSummary(w http.ResponseWriter, r *http.Request
 		period = "M"
 	}
 
-	now := time.Now()
+	location, err := time.LoadLocation("Asia/Kolkata")
+	if err != nil {
+		http.Error(w, "Failed to load timezone", http.StatusInternalServerError)
+		return
+	}
+	now := time.Now().In(location)
 
 	var startDate time.Time
 	var endDate time.Time
@@ -392,7 +402,7 @@ func (h *ExpenseHandler) GetPeriodSummary(w http.ResponseWriter, r *http.Request
 			startDate.Month(),
 			startDate.Day(),
 			0, 0, 0, 0,
-			now.Location())
+			location)
 		endDate = startDate.AddDate(0, 0, 7)
 
 	case "M":
@@ -401,7 +411,7 @@ func (h *ExpenseHandler) GetPeriodSummary(w http.ResponseWriter, r *http.Request
 			now.Month(),
 			1,
 			0, 0, 0, 0,
-			now.Location(),
+			location,
 		)
 		endDate = startDate.AddDate(0, 1, 0)
 
@@ -411,7 +421,7 @@ func (h *ExpenseHandler) GetPeriodSummary(w http.ResponseWriter, r *http.Request
 			1,
 			1,
 			0, 0, 0, 0,
-			now.Location(),
+			location,
 		)
 		endDate = startDate.AddDate(1, 0, 0)
 

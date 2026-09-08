@@ -50,7 +50,13 @@ export default function useLogin() {
       setLoading(true);
 
       const response = await authService.login(form);
-      await notificationService.registerPushToken();
+      
+      try{
+        await notificationService.registerPushToken();
+      } catch(error){
+        console.error("Push token registration failed:", error)
+      }
+      
       console.log("Login successful:",response);
 
       router.replace("/(tabs)");
