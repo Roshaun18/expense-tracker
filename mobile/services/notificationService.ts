@@ -56,7 +56,7 @@ class NotificationService {
 
       trigger: {
         type: Notifications.SchedulableTriggerInputTypes.DAILY,
-        hour: 9,
+        hour: 12,
         minute: 0,
       },
     });

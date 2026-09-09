@@ -3,7 +3,23 @@ import { Ionicons } from "@expo/vector-icons";
 
 import { colors } from "../../theme";
 
+import { useEffect } from "react";
+import notificationService from "../../services/notificationService";
+
 export default function TabsLayout() {
+  useEffect(() => {
+    const setupNotifications = async () => {
+      try {
+        await notificationService.scheduleDailyReminder();
+      } catch (error) {
+        console.error("Daily reminder scheduling failed:", error);
+      }
+    };
+
+    setupNotifications();
+  }, []);
+
+  
   return (
     <Tabs
       screenOptions={{
